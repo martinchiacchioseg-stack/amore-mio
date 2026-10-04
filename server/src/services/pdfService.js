@@ -64,7 +64,7 @@ function drawFooter(doc) {
     doc.text(`Página ${i + 1} de ${pageCount}`, 0, 750, { align: 'right', width: 550 });
 
     doc.fillColor('#C45A78')
-       .text('Desarrollado por Roldfy', 45, 762, { align: 'center', width: 505 });
+       .text('Desarrollado por RolΦ Studio', 45, 762, { align: 'center', width: 505 });
   }
 }
 

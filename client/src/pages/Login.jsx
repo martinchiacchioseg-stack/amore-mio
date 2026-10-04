@@ -121,7 +121,7 @@ export default function Login() {
           {/* Footer note */}
           <div className="mt-8 pt-6 border-t border-slate-100 text-center">
             <span className="text-[11px] text-slate-400 block">
-              Desarrollado por <strong className="text-slate-600">Roldfy Studio</strong>
+              Desarrollado por <strong className="text-slate-700 font-extrabold tracking-wider">RolΦ Studio</strong>
             </span>
           </div>
 

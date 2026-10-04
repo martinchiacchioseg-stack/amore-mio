@@ -18,7 +18,7 @@ export default function SuperAdminModal({ onClose }) {
     try {
       const loginRes = await api.post('/auth/login', { email, password });
       if (loginRes.data.user.role !== 'SUPERADMIN') {
-        setError('Acceso denegado. Este portal es exclusivo para el equipo técnico de Roldfy Studio.');
+        setError('Acceso denegado. Este portal es exclusivo para el equipo técnico de RolΦ Studio.');
         setLoading(false);
         return;
       }
@@ -48,11 +48,13 @@ export default function SuperAdminModal({ onClose }) {
         </button>
 
         <div className="flex items-center space-x-3 mb-5">
-          <div className="p-3 bg-brand-600/20 text-brand-400 rounded-xl border border-brand-500/30">
-            <Shield className="w-6 h-6" />
+          <div className="p-3 bg-brand-600/20 text-brand-400 rounded-xl border border-brand-500/30 font-extrabold text-xl font-mono">
+            RolΦ
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Supervisión Técnica Roldfy Studio</h3>
+            <h3 className="text-lg font-bold text-white flex items-center">
+              Supervisión Técnica <span className="text-brand-400 ml-1">RolΦ Studio</span>
+            </h3>
             <p className="text-xs text-slate-400">Portal de diagnóstico y soporte independiente</p>
           </div>
         </div>
@@ -67,7 +69,7 @@ export default function SuperAdminModal({ onClose }) {
         {!authenticated ? (
           <form onSubmit={handleSuperLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Email Roldfy SuperAdmin</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Email RolΦ SuperAdmin</label>
               <input
                 type="email"
                 value={email}
@@ -102,7 +104,7 @@ export default function SuperAdminModal({ onClose }) {
             <div className="p-3 bg-emerald-950/40 border border-emerald-700/40 rounded-xl text-emerald-300 text-xs flex items-center justify-between">
               <span className="flex items-center space-x-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Base de Datos SQLite: ONLINE</span>
+                <span>Base de Datos: ONLINE</span>
               </span>
               <span className="font-mono text-[10px] bg-emerald-900/60 px-2 py-0.5 rounded text-emerald-200">
                 v{healthData?.producer?.version}
@@ -150,7 +152,7 @@ export default function SuperAdminModal({ onClose }) {
             </div>
 
             <p className="text-[11px] text-slate-500 text-center">
-              Supervisión técnica aislada. Este módulo no interactúa con las finanzas ni la configuración del local.
+              Supervisión técnica aislada por RolΦ Studio.
             </p>
           </div>
         )}

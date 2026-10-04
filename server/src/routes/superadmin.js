@@ -15,9 +15,9 @@ router.get('/health', authenticateToken, requireRole('SUPERADMIN'), async (req, 
 
     return res.json({
       producer: {
-        studio: 'Roldfy Studio',
-        developer: 'Soporte Técnico Roldfy',
-        contact: 'soporte@roldfy.com',
+        studio: 'RolΦ Studio',
+        developer: 'Soporte Técnico RolΦ',
+        contact: 'soporte@rolphi.com',
         version: '1.0.0-PROD'
       },
       system: {
