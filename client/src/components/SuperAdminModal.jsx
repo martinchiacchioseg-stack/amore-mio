@@ -9,6 +9,11 @@ export default function SuperAdminModal({ onClose }) {
   const [healthData, setHealthData] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  const [diagRunning, setDiagRunning] = useState(false);
+  const [diagLogs, setDiagLogs] = useState([]);
+  const [diagSuccess, setDiagSuccess] = useState(null);
+  const [tempToken, setTempToken] = useState(null);
 
   const handleSuperLogin = async (e) => {
     e.preventDefault();
@@ -23,9 +28,10 @@ export default function SuperAdminModal({ onClose }) {
         return;
       }
 
-      const tempToken = loginRes.data.token;
+      const token = loginRes.data.token;
+      setTempToken(token);
       const healthRes = await api.get('/superadmin/health', {
-        headers: { Authorization: `Bearer ${tempToken}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       setHealthData(healthRes.data);
@@ -44,9 +50,31 @@ export default function SuperAdminModal({ onClose }) {
     }
   };
 
+  const handleRunDiagnostics = async () => {
+    setDiagRunning(true);
+    setDiagLogs([]);
+    setDiagSuccess(null);
+    try {
+      const res = await api.post('/superadmin/diagnostics/run', {}, {
+        headers: { Authorization: `Bearer ${tempToken}` }
+      });
+      setDiagLogs(res.data.logs);
+      setDiagSuccess(true);
+    } catch (err) {
+      if (err.response?.data?.logs) {
+        setDiagLogs(err.response.data.logs);
+      } else {
+        setDiagLogs(['ERROR CRITICO: Error de conexión.']);
+      }
+      setDiagSuccess(false);
+    } finally {
+      setDiagRunning(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-700 text-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+      <div className="bg-slate-900 border border-slate-700 text-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] flex flex-col">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
@@ -155,8 +183,24 @@ export default function SuperAdminModal({ onClose }) {
                 </div>
               </div>
             </div>
+            
+            <div className="pt-2 border-t border-slate-700/60 mt-4">
+              <button
+                onClick={handleRunDiagnostics}
+                disabled={diagRunning}
+                className="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 rounded-xl text-xs transition disabled:opacity-50 border border-slate-600"
+              >
+                {diagRunning ? 'Ejecutando Diagnóstico E2E...' : 'Correr Diagnóstico Integral E2E'}
+              </button>
 
-            <p className="text-[11px] text-slate-500 text-center">
+              {diagLogs.length > 0 && (
+                <div className={`mt-3 p-3 rounded-xl border font-mono text-[10px] h-32 overflow-y-auto ${diagSuccess ? 'bg-emerald-950/20 border-emerald-800 text-emerald-300' : 'bg-red-950/20 border-red-800 text-red-300'}`}>
+                  {diagLogs.map((l, i) => <div key={i}>{l}</div>)}
+                </div>
+              )}
+            </div>
+
+            <p className="text-[11px] text-slate-500 text-center mt-4">
               Supervisión técnica aislada por RolΦ Studio.
             </p>
           </div>
