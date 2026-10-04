@@ -12,12 +12,63 @@ import {
   Tag
 } from 'lucide-react';
 
+const FALLBACK_PRODUCTS = [
+  {
+    id: 1,
+    code: 'ART-101',
+    name: 'Conjunto Encaje Sensazione',
+    description: 'Conjunto de encaje elastizado con aro y colaless. Alta calidad y confort.',
+    sale_price: 14900,
+    stock: 15,
+    category_name: 'Conjuntos Femeninos',
+    image_url: null,
+    is_available: true,
+    whatsapp_link: 'https://wa.me/5493416123456?text=Quiero%20consultar%20por%20ART-101%20Conjunto%20Encaje%20Sensazione'
+  },
+  {
+    id: 2,
+    code: 'ART-102',
+    name: 'Body Soft Velvet',
+    description: 'Body de terciopelo con transparencias y breteles regulables.',
+    sale_price: 19800,
+    stock: 8,
+    category_name: 'Lencería Fina',
+    image_url: null,
+    is_available: true,
+    whatsapp_link: 'https://wa.me/5493416123456?text=Quiero%20consultar%20por%20ART-102%20Body%20Soft%20Velvet'
+  },
+  {
+    id: 3,
+    code: 'ART-201',
+    name: 'Boxer Seamless Confort Hombre',
+    description: 'Boxer sin costuras 100% algodón peinado de máxima suavidad.',
+    sale_price: 7500,
+    stock: 25,
+    category_name: 'Ropa Interior Masculina',
+    image_url: null,
+    is_available: true,
+    whatsapp_link: 'https://wa.me/5493416123456?text=Quiero%20consultar%20por%20ART-201%20Boxer%20Seamless'
+  },
+  {
+    id: 4,
+    code: 'ART-301',
+    name: 'Pijama Satin Elegance',
+    description: 'Pijama de raso satén 2 piezas (saco abotonado y pantalón).',
+    sale_price: 26900,
+    stock: 0,
+    category_name: 'Pijamas & Homewear',
+    image_url: null,
+    is_available: false,
+    whatsapp_link: 'https://wa.me/5493416123456?text=Quiero%20consultar%20por%20ART-301%20Pijama%20Satin'
+  }
+];
+
 export default function PublicCatalog() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState(FALLBACK_PRODUCTS);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadCategories();
@@ -27,9 +78,17 @@ export default function PublicCatalog() {
   const loadCategories = async () => {
     try {
       const res = await api.get('/categories');
-      setCategories(res.data);
+      if (Array.isArray(res.data)) {
+        setCategories(res.data);
+      }
     } catch (err) {
-      console.error('Error cargando categorías:', err);
+      console.warn('Usando categorías locales:', err);
+      setCategories([
+        { id: 1, name: 'Conjuntos Femeninos' },
+        { id: 2, name: 'Lencería Fina' },
+        { id: 3, name: 'Ropa Interior Masculina' },
+        { id: 4, name: 'Pijamas & Homewear' }
+      ]);
     }
   };
 
@@ -39,12 +98,28 @@ export default function PublicCatalog() {
       const res = await api.get('/catalog', {
         params: { category: selectedCategory, search }
       });
-      setProducts(res.data);
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        setProducts(res.data);
+      } else {
+        filterFallbackProducts();
+      }
     } catch (err) {
-      console.error('Error cargando catálogo:', err);
+      console.warn('Conexión backend en espera, mostrando catálogo estático:', err);
+      filterFallbackProducts();
     } finally {
       setLoading(false);
     }
+  };
+
+  const filterFallbackProducts = () => {
+    let list = [...FALLBACK_PRODUCTS];
+    if (selectedCategory) {
+      list = list.filter(p => p.category_name && p.category_name.toLowerCase().includes(selectedCategory.toLowerCase()));
+    }
+    if (search) {
+      list = list.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.code.toLowerCase().includes(search.toLowerCase()));
+    }
+    setProducts(list);
   };
 
   const handleDownloadPDF = () => {
@@ -68,6 +143,7 @@ export default function PublicCatalog() {
               src="/assets/logo.jpg" 
               alt="Amore Mío Logo" 
               className="h-28 w-28 md:h-36 md:w-36 rounded-full object-cover border-4 border-brand-400/40 shadow-2xl shadow-brand-500/20"
+              onError={(e) => { e.target.style.display = 'none'; }}
             />
           </div>
 
@@ -103,7 +179,6 @@ export default function PublicCatalog() {
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
         {/* Filter Toolbar */}
         <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 mb-8 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
-          {/* Category Chips */}
           <div className="flex flex-wrap gap-2 items-center">
             <button
               onClick={() => setSelectedCategory('')}
@@ -118,9 +193,9 @@ export default function PublicCatalog() {
             {categories.map((cat) => (
               <button
                 key={cat.id}
-                onClick={() => setSelectedCategory(cat.id.toString())}
+                onClick={() => setSelectedCategory(cat.name)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                  selectedCategory === cat.id.toString()
+                  selectedCategory === cat.name
                     ? 'bg-brand-600 text-white shadow-sm'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
@@ -130,7 +205,6 @@ export default function PublicCatalog() {
             ))}
           </div>
 
-          {/* Search Box */}
           <div className="relative w-full md:w-72">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
             <input
@@ -146,7 +220,7 @@ export default function PublicCatalog() {
         {/* Product Grid */}
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
+            {[1, 2, 3, 4].map((n) => (
               <div key={n} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 animate-pulse h-80"></div>
             ))}
           </div>
@@ -158,86 +232,85 @@ export default function PublicCatalog() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <div 
-                key={product.id}
-                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 flex flex-col group"
-              >
-                {/* Image Container */}
-                <div className="relative h-64 bg-slate-100 overflow-hidden">
-                  {product.image_url ? (
-                    <img 
-                      src={product.image_url} 
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-brand-50 to-slate-100 text-slate-400">
-                      <Heart className="w-12 h-12 mb-2 text-brand-300" />
-                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Amore Mío</span>
-                    </div>
-                  )}
-
-                  {/* Stock Status Badge */}
-                  <div className="absolute top-3 right-3">
-                    {product.is_available ? (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/90 text-white backdrop-blur-sm shadow-sm">
-                        <CheckCircle2 className="w-3 h-3 mr-1" /> Stock Disponible
-                      </span>
+            {products.map((product) => {
+              const isAvailable = product.stock > 0 || product.is_available;
+              return (
+                <div 
+                  key={product.id}
+                  className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 flex flex-col group"
+                >
+                  <div className="relative h-64 bg-slate-100 overflow-hidden">
+                    {product.image_url ? (
+                      <img 
+                        src={product.image_url} 
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
                     ) : (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-600/90 text-white backdrop-blur-sm shadow-sm">
-                        <XCircle className="w-3 h-3 mr-1" /> Agotado
-                      </span>
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-brand-50 to-slate-100 text-slate-400">
+                        <Heart className="w-12 h-12 mb-2 text-brand-300" />
+                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Amore Mío</span>
+                      </div>
                     )}
-                  </div>
 
-                  {/* Category Tag */}
-                  {product.category_name && (
-                    <div className="absolute bottom-3 left-3">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/80 text-white backdrop-blur-sm">
-                        <Tag className="w-3 h-3 mr-1 text-brand-400" />
-                        {product.category_name}
-                      </span>
+                    <div className="absolute top-3 right-3">
+                      {isAvailable ? (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/90 text-white backdrop-blur-sm shadow-sm">
+                          <CheckCircle2 className="w-3 h-3 mr-1" /> Stock Disponible
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-600/90 text-white backdrop-blur-sm shadow-sm">
+                          <XCircle className="w-3 h-3 mr-1" /> Agotado
+                        </span>
+                      )}
                     </div>
-                  )}
-                </div>
 
-                {/* Details */}
-                <div className="p-5 flex-1 flex flex-col justify-between">
-                  <div>
-                    <span className="text-[10px] font-mono text-slate-400 block mb-1">CÓD: {product.code}</span>
-                    <h3 className="text-base font-bold text-slate-900 group-hover:text-brand-600 transition-colors leading-snug">
-                      {product.name}
-                    </h3>
-                    {product.description && (
-                      <p className="text-xs text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">
-                        {product.description}
-                      </p>
+                    {product.category_name && (
+                      <div className="absolute bottom-3 left-3">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/80 text-white backdrop-blur-sm">
+                          <Tag className="w-3 h-3 mr-1 text-brand-400" />
+                          {product.category_name}
+                        </span>
+                      </div>
                     )}
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                  <div className="p-5 flex-1 flex flex-col justify-between">
                     <div>
-                      <span className="text-[10px] text-slate-400 font-medium block">Precio</span>
-                      <span className="text-xl font-extrabold text-brand-600">
-                        ${Number(product.sale_price).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
-                      </span>
+                      <span className="text-[10px] font-mono text-slate-400 block mb-1">CÓD: {product.code}</span>
+                      <h3 className="text-base font-bold text-slate-900 group-hover:text-brand-600 transition-colors leading-snug">
+                        {product.name}
+                      </h3>
+                      {product.description && (
+                        <p className="text-xs text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">
+                          {product.description}
+                        </p>
+                      )}
                     </div>
 
-                    <a
-                      href={product.whatsapp_link}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition shadow-sm hover:scale-105"
-                      title="Consultar por WhatsApp"
-                    >
-                      <MessageCircle className="w-4 h-4 mr-1.5" />
-                      Consultar
-                    </a>
+                    <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] text-slate-400 font-medium block">Precio</span>
+                        <span className="text-xl font-extrabold text-brand-600">
+                          ${Number(product.sale_price).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
+                        </span>
+                      </div>
+
+                      <a
+                        href={product.whatsapp_link || `https://wa.me/5493416123456?text=Consultar%20por%20${encodeURIComponent(product.name)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition shadow-sm hover:scale-105"
+                        title="Consultar por WhatsApp"
+                      >
+                        <MessageCircle className="w-4 h-4 mr-1.5" />
+                        Consultar
+                      </a>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
