@@ -45,21 +45,13 @@ export default function Navbar() {
           
           {/* Logo & Brand Name */}
           <div className="flex items-center space-x-3">
-            <Link to="/" className="flex items-center space-x-3 group">
-              <div className="p-0.5 rounded-full group-hover:scale-105 transition-transform">
+            <Link to="/" className="flex items-center group">
+              <div className="group-hover:scale-105 transition-transform">
                 <img 
                   src="/assets/logo_final.jpg" 
                   alt="Amore Mío Logo" 
-                  className="h-12 w-12 sm:h-14 sm:w-14 rounded-full object-contain"
+                  className="h-14 w-auto object-contain rounded"
                 />
-              </div>
-              <div>
-                <span className="text-xl sm:text-2xl font-bold tracking-tight text-white block leading-tight group-hover:text-brand-300 transition-colors">
-                  AMORE MÍO
-                </span>
-                <span className="text-[10px] sm:text-xs uppercase font-medium tracking-widest text-brand-500 block">
-                  Ropa Interior
-                </span>
               </div>
             </Link>
           </div>
