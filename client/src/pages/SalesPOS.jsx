@@ -205,12 +205,22 @@ export default function SalesPOS() {
               </p>
             </div>
           </div>
-          <button 
-            onClick={() => setLastCompletedSale(null)}
-            className="text-xs font-semibold text-emerald-700 hover:text-emerald-900"
-          >
-            Cerrar
-          </button>
+          <div className="flex items-center space-x-4">
+            <a 
+              href={`/api/sales/${lastCompletedSale.id}/pdf?token=${localStorage.getItem('amoremio_token')}`}
+              target="_blank"
+              rel="noreferrer"
+              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition"
+            >
+              Descargar Ticket
+            </a>
+            <button 
+              onClick={() => setLastCompletedSale(null)}
+              className="text-xs font-semibold text-emerald-700 hover:text-emerald-900"
+            >
+              Cerrar
+            </button>
+          </div>
         </div>
       )}
 

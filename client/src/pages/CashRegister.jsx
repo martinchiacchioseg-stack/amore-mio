@@ -98,7 +98,7 @@ export default function CashRegister() {
       alert('Por favor selecciona un vendedor para generar el informe de rendición.');
       return;
     }
-    window.open(`/api/cash/settlement/seller/${selectedSeller}/pdf?startDate=${startDate}&endDate=${endDate}`, '_blank');
+    window.open(`/api/cash/settlement/seller/${selectedSeller}/pdf?startDate=${startDate}&endDate=${endDate}&token=${localStorage.getItem('amoremio_token')}`, '_blank');
   };
 
   return (

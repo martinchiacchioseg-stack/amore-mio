@@ -1,6 +1,7 @@
 import express from 'express';
 import { client } from '../config/db.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { generateSaleTicketPDF } from '../services/pdfService.js';
 
 const router = express.Router();
 
@@ -76,7 +77,42 @@ router.get('/:id', authenticateToken, async (req, res) => {
       items: itemsRes.rows
     });
   } catch (err) {
-    return res.status(500).json({ error: 'Error al obtener detalle de la venta.' });
+    return res.status(500).json({ error: 'Error al obtener detalle de venta.' });
+  }
+});
+
+// GET /api/sales/:id/pdf (Download Sale Ticket)
+router.get('/:id/pdf', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const saleRes = await client.execute({
+      sql: `SELECT s.*, u.name as seller_name, c.name as customer_name, c.phone as customer_phone, c.document_number as customer_document
+            FROM sales s
+            JOIN users u ON s.seller_id = u.id
+            LEFT JOIN customers c ON s.customer_id = c.id
+            WHERE s.id = ?`,
+      args: [id]
+    });
+
+    if (saleRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Venta no encontrada.' });
+    }
+
+    const itemsRes = await client.execute({
+      sql: `SELECT si.*, p.name as product_name, p.code as product_code
+            FROM sale_items si
+            JOIN products p ON si.product_id = p.id
+            WHERE si.sale_id = ?`,
+      args: [id]
+    });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=Comprobante_${saleRes.rows[0].sale_number}.pdf`);
+
+    generateSaleTicketPDF(saleRes.rows[0], itemsRes.rows, res);
+  } catch (err) {
+    console.error('Error generating ticket PDF:', err);
+    return res.status(500).json({ error: 'Error al generar comprobante.' });
   }
 });
 

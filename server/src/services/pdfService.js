@@ -5,11 +5,17 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const logoPath = path.join(__dirname, '../../public/assets/logo.jpg');
+
+const possiblePaths = [
+  path.join(process.cwd(), 'public/assets/logo.jpg'), // Vercel
+  path.join(__dirname, '../../../client/public/assets/logo.jpg'), // Local monorepo
+  path.join(__dirname, '../../public/assets/logo.jpg') // Local server
+];
+const logoPath = possiblePaths.find(p => fs.existsSync(p));
 
 function drawHeader(doc, title, subtitle = '') {
   // Brand Header
-  if (fs.existsSync(logoPath)) {
+  if (logoPath) {
     try {
       doc.image(logoPath, 45, 45, { width: 70 });
     } catch (e) {
@@ -266,5 +272,71 @@ export function generateSellerSettlementPDF(seller, sales, res) {
   });
 
   drawFooter(doc);
+  doc.end();
+}
+
+export function generateSaleTicketPDF(sale, items, res) {
+  const doc = new PDFDocument({ margin: 45, size: 'A5' });
+  doc.pipe(res);
+
+  drawHeader(doc, 'TICKET DE COMPRA', `Nº ${sale.sale_number} - ${new Date(sale.created_at).toLocaleDateString('es-AR')}`);
+
+  let y = 140;
+
+  // Customer Info
+  doc.fontSize(10).font('Helvetica-Bold').fillColor('#333').text('Cliente:', 45, y);
+  doc.font('Helvetica').text(sale.customer_name || 'Consumidor Final', 95, y);
+  y += 15;
+  if (sale.customer_document) {
+    doc.font('Helvetica-Bold').text('DNI/CUIT:', 45, y);
+    doc.font('Helvetica').text(sale.customer_document, 105, y);
+    y += 15;
+  }
+  doc.font('Helvetica-Bold').text('Atendido por:', 45, y);
+  doc.font('Helvetica').text(sale.seller_name, 115, y);
+  y += 20;
+
+  // Table header
+  doc.rect(45, y, 320, 18).fill('#F8F9FA');
+  doc.fillColor('#1A1A1A').fontSize(8).font('Helvetica-Bold');
+  doc.text('CANT', 50, y + 5);
+  doc.text('ARTÍCULO', 90, y + 5);
+  doc.text('P.UNIT', 250, y + 5, { width: 50, align: 'right' });
+  doc.text('SUBT', 310, y + 5, { width: 50, align: 'right' });
+  y += 25;
+
+  doc.font('Helvetica').fontSize(9).fillColor('#333');
+  items.forEach(item => {
+    if (y > 520) {
+      doc.addPage({ margin: 45, size: 'A5' });
+      drawHeader(doc, 'TICKET DE COMPRA (cont.)');
+      y = 140;
+    }
+    
+    doc.text(item.quantity, 50, y);
+    doc.text(`${item.product_code} - ${item.product_name}`, 90, y, { width: 150 });
+    doc.text(`$${Number(item.unit_sale_price).toLocaleString('es-AR')}`, 250, y, { width: 50, align: 'right' });
+    doc.text(`$${Number(item.subtotal).toLocaleString('es-AR')}`, 310, y, { width: 50, align: 'right' });
+    y += Math.max(20, doc.heightOfString(`${item.product_code} - ${item.product_name}`, { width: 150 }) + 10);
+  });
+
+  // Totals
+  doc.moveTo(45, y).lineTo(365, y).strokeColor('#E0E0E0').lineWidth(1).stroke();
+  y += 10;
+  
+  if (Number(sale.discount) > 0) {
+    doc.font('Helvetica').fontSize(10);
+    doc.text('Descuento:', 200, y, { width: 100, align: 'right' });
+    doc.text(`-$${Number(sale.discount).toLocaleString('es-AR')}`, 310, y, { width: 50, align: 'right' });
+    y += 15;
+  }
+
+  doc.font('Helvetica-Bold').fontSize(12).fillColor('#C45A78');
+  doc.text('TOTAL:', 200, y, { width: 100, align: 'right' });
+  doc.text(`$${Number(sale.total).toLocaleString('es-AR')}`, 310, y, { width: 50, align: 'right' });
+  
+  y += 30;
+  doc.font('Helvetica').fontSize(8).fillColor('#888').text('Gracias por elegir Amore Mío.', 45, y, { align: 'center', width: 320 });
+
   doc.end();
 }
