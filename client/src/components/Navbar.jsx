@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { 
@@ -11,13 +11,16 @@ import {
   BarChart3, 
   Settings, 
   LogOut, 
-  Store 
+  Store,
+  Menu,
+  X
 } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
     { label: 'Punto de Venta', path: '/app/sales', icon: ShoppingCart, roles: ['ADMIN', 'SELLER', 'MANAGER', 'SUPERADMIN'] },
@@ -113,14 +116,58 @@ export default function Navbar() {
             ) : (
               <Link
                 to="/login"
-                className="inline-flex items-center px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition"
+                className="hidden md:inline-flex items-center px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition"
               >
                 Ingreso Personal
               </Link>
             )}
+
+            {/* Mobile menu toggle */}
+            {user && (
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 ml-2 text-slate-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      {mobileMenuOpen && user && (
+        <div className="md:hidden border-t border-slate-100 bg-white">
+          <div className="px-4 py-3 space-y-1">
+            <div className="mb-4 pb-3 border-b border-slate-100">
+              <span className="text-sm font-bold text-slate-800 block">{user.name}</span>
+              <span className="text-[10px] text-brand-600 uppercase font-semibold block">{user.role}</span>
+            </div>
+            
+            {navItems
+              .filter(item => item.roles.includes(user.role))
+              .map(item => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center px-3 py-3 text-sm font-semibold rounded-xl transition-colors ${
+                      isActive
+                        ? 'bg-brand-50 text-brand-700 font-bold border-l-4 border-brand-600'
+                        : 'text-slate-600 hover:text-brand-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5 mr-3 text-brand-600" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+          </div>
+        </div>
+      )}
     </header>
   );
 }

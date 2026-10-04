@@ -225,7 +225,7 @@ export default function SalesPOS() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left Column: Product Selector (7 cols) */}
-        <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-[650px]">
+        <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-[500px] lg:h-[650px]">
           
           {/* Search bar */}
           <div className="relative mb-4">
@@ -284,7 +284,7 @@ export default function SalesPOS() {
         </div>
 
         {/* Right Column: Cart, Customer & Checkout (5 cols) */}
-        <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between h-[650px]">
+        <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between h-auto lg:h-[650px]">
           
           <div className="space-y-4 flex-1 overflow-y-auto pr-1">
             
