@@ -52,11 +52,11 @@ export default function Login() {
           
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex p-3 bg-brand-50 rounded-2xl border border-brand-100 mb-4">
+            <div className="inline-flex p-3 bg-brand-50 rounded-2xl border border-brand-100 mb-4 shadow-sm">
               <img 
-                src="/assets/logo.jpg" 
+                src="/assets/logo2.png" 
                 alt="Amore Mío Logo" 
-                className="h-16 w-16 rounded-full object-cover border-2 border-brand-400 shadow-md"
+                className="h-20 w-20 sm:h-24 sm:w-24 rounded-full object-contain bg-white"
               />
             </div>
             <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">

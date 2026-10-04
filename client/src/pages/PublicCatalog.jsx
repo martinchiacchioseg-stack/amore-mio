@@ -140,14 +140,16 @@ export default function PublicCatalog() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
           
           <div className="flex items-center space-x-4">
-            <img 
-              src="/assets/logo.jpg" 
-              alt="Amore Mío Logo" 
-              className="h-12 w-12 rounded-full object-cover border-2 border-brand-400/40 shadow-sm"
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
+            <div className="bg-white/10 p-1 rounded-full border-2 border-brand-400/40 shadow-sm">
+              <img 
+                src="/assets/logo2.png" 
+                alt="Amore Mío Logo" 
+                className="h-14 w-14 sm:h-16 sm:w-16 rounded-full object-contain bg-white"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
             <div>
-              <h1 className="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-brand-100 to-brand-300 leading-none">
+              <h1 className="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-brand-100 to-brand-300 leading-none">
                 AMORE MÍO
               </h1>
               <p className="text-[10px] font-medium text-brand-200 tracking-wider uppercase mt-1">
