@@ -177,4 +177,49 @@ router.get('/settlement/seller/:sellerId/pdf', authenticateToken, async (req, re
   }
 });
 
+// GET /api/cash/sellers-balance
+router.get('/sellers-balance', authenticateToken, requireRole('ADMIN', 'SUPERADMIN', 'MANAGER'), async (req, res) => {
+  try {
+    // For each seller: Sum of commissions earned minus sum of COMMISSION_PAYMENT expenses
+    const sql = `
+      SELECT u.id, u.name,
+             COALESCE((SELECT SUM(seller_commission) FROM sales WHERE seller_id = u.id AND status = 'COMPLETED'), 0) as total_earned,
+             COALESCE((SELECT SUM(amount) FROM cash_movements WHERE seller_id = u.id AND category = 'COMMISSION_PAYMENT'), 0) as total_paid
+      FROM users u
+      WHERE u.role IN ('SELLER', 'ADMIN')
+    `;
+    const dbRes = await client.execute(sql);
+    const balances = dbRes.rows.map(r => ({
+      id: r.id,
+      name: r.name,
+      total_earned: Number(r.total_earned),
+      total_paid: Number(r.total_paid),
+      balance: Number(r.total_earned) - Number(r.total_paid)
+    }));
+    return res.json(balances);
+  } catch (err) {
+    return res.status(500).json({ error: 'Error al obtener saldos de vendedores.' });
+  }
+});
+
+// POST /api/cash/pay-commission
+router.post('/pay-commission', authenticateToken, requireRole('ADMIN', 'SUPERADMIN', 'MANAGER'), async (req, res) => {
+  try {
+    const { seller_id, amount, payment_method, notes } = req.body;
+    if (!seller_id || !amount || amount <= 0 || !payment_method) {
+      return res.status(400).json({ error: 'Datos de pago incompletos o inválidos.' });
+    }
+
+    await client.execute({
+      sql: `INSERT INTO cash_movements (seller_id, type, amount, payment_method, category, description)
+            VALUES (?, 'EXPENSE', ?, ?, 'COMMISSION_PAYMENT', ?)`,
+      args: [seller_id, amount, payment_method, `Pago de comisiones acumuladas. Notas: ${notes || ''}`]
+    });
+
+    return res.json({ success: true, message: 'Pago de comisión registrado exitosamente.' });
+  } catch (err) {
+    return res.status(500).json({ error: 'Error al registrar el pago de comisión.' });
+  }
+});
+
 export default router;

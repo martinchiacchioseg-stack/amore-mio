@@ -22,7 +22,6 @@ export default function CashRegister() {
 
   const [selectedSeller, setSelectedSeller] = useState('');
   
-  // Date filters (defaults to today)
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
 
@@ -33,11 +32,26 @@ export default function CashRegister() {
   const [moveMethod, setMoveMethod] = useState('CASH');
   const [moveDesc, setMoveDesc] = useState('');
 
+  // Pay Commission Modal
+  const [sellerBalances, setSellerBalances] = useState([]);
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [payData, setPayData] = useState({ seller_id: '', amount: '', payment_method: 'CASH', notes: '' });
+
   useEffect(() => {
     loadSummary();
     loadMovements();
     loadSellers();
+    loadSellerBalances();
   }, [startDate, endDate]);
+
+  const loadSellerBalances = async () => {
+    try {
+      const res = await api.get('/cash/sellers-balance');
+      setSellerBalances(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const loadSummary = async () => {
     setLoading(true);
@@ -90,6 +104,26 @@ export default function CashRegister() {
       loadMovements();
     } catch (err) {
       alert(err.response?.data?.error || 'Error al registrar movimiento.');
+    }
+  };
+
+  const handlePayCommission = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/cash/pay-commission', {
+        seller_id: payData.seller_id,
+        amount: Number(payData.amount),
+        payment_method: payData.payment_method,
+        notes: payData.notes
+      });
+      setShowPayModal(false);
+      setPayData({ seller_id: '', amount: '', payment_method: 'CASH', notes: '' });
+      loadSummary();
+      loadMovements();
+      loadSellerBalances();
+      alert('Pago registrado correctamente. Puedes imprimir el comprobante de liquidación desde arriba.');
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error al registrar pago.');
     }
   };
 
@@ -312,6 +346,50 @@ export default function CashRegister() {
         </div>
       </div>
 
+      {/* Seller Commission Balances Table */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-6">
+        <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+          <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center">
+            <UserCheck className="w-4 h-4 mr-1.5 text-brand-600" /> Saldos Acumulados de Vendedores
+          </h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200">
+              <tr>
+                <th className="p-3.5">Vendedor</th>
+                <th className="p-3.5 text-right text-emerald-700">Total Generado</th>
+                <th className="p-3.5 text-right text-rose-700">Total Pagado</th>
+                <th className="p-3.5 text-right">Saldo Adeudado</th>
+                <th className="p-3.5 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {sellerBalances.map((seller) => (
+                <tr key={seller.id} className="hover:bg-slate-50/80 transition">
+                  <td className="p-3.5 font-bold text-slate-800">{seller.name}</td>
+                  <td className="p-3.5 text-right font-bold text-emerald-600">${seller.total_earned.toLocaleString('es-AR')}</td>
+                  <td className="p-3.5 text-right font-bold text-rose-600">${seller.total_paid.toLocaleString('es-AR')}</td>
+                  <td className="p-3.5 text-right font-extrabold text-brand-600">${seller.balance.toLocaleString('es-AR')}</td>
+                  <td className="p-3.5 text-center">
+                    <button
+                      onClick={() => {
+                        setPayData({ ...payData, seller_id: seller.id, amount: seller.balance > 0 ? seller.balance : 0 });
+                        setShowPayModal(true);
+                      }}
+                      disabled={seller.balance <= 0}
+                      className="px-3 py-1.5 bg-brand-100 hover:bg-brand-200 text-brand-700 font-bold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Pagar Comisión
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* Manual Movement Modal */}
       {showMoveModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -400,6 +478,67 @@ export default function CashRegister() {
         </div>
       )}
 
+      {/* Pay Commission Modal */}
+      {showPayModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Pagar Comisión a Vendedor</h3>
+            <form onSubmit={handlePayCommission} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Monto a Pagar ($) *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={payData.amount}
+                  onChange={(e) => setPayData({...payData, amount: e.target.value})}
+                  required
+                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Medio de Pago</label>
+                <select
+                  value={payData.payment_method}
+                  onChange={(e) => setPayData({...payData, payment_method: e.target.value})}
+                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs bg-slate-50 outline-none"
+                >
+                  <option value="CASH">Efectivo (Impacta en Caja)</option>
+                  <option value="TRANSFER">Transferencia (Impacta en Caja)</option>
+                  <option value="QR">Mercado QR (Impacta en Caja)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Notas (Opcional)</label>
+                <input
+                  type="text"
+                  value={payData.notes}
+                  onChange={(e) => setPayData({...payData, notes: e.target.value})}
+                  placeholder="Ej: Liquidación quincenal"
+                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowPayModal(false)}
+                  className="px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-600"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-brand-600 text-white font-bold rounded-xl text-xs"
+                >
+                  Registrar Pago
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
