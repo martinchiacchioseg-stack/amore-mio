@@ -9,25 +9,13 @@ import { authenticateToken, requireRole } from '../middleware/auth.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const uploadDir = path.join(__dirname, '../../public/uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, 'product-' + uniqueSuffix + ext);
-  }
-});
+// Vercel (serverless) tiene un sistema de archivos de solo lectura, por eso las
+// imágenes se guardan en memoria y luego dentro de la base de datos (data URL).
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB max (límite de Vercel ~4.5MB por request)
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
@@ -36,6 +24,8 @@ const upload = multer({
     }
   }
 });
+
+const fileToDataUrl = (file) => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
 
 const router = express.Router();
 
@@ -114,7 +104,7 @@ router.post('/', authenticateToken, requireRole('ADMIN', 'MANAGER', 'SUPERADMIN'
       req.body.profit_percentage = calculatedProfit;
     }
 
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : (req.body.image_url || null);
+    const imageUrl = req.file ? fileToDataUrl(req.file) : (req.body.image_url || null);
 
     await client.execute({
       sql: `INSERT INTO products (
@@ -164,7 +154,7 @@ router.put('/:id', authenticateToken, requireRole('ADMIN', 'MANAGER', 'SUPERADMI
 
     let imageUrl = req.body.image_url;
     if (req.file) {
-      imageUrl = `/uploads/${req.file.filename}`;
+      imageUrl = fileToDataUrl(req.file);
     }
 
     await client.execute({

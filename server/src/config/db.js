@@ -7,18 +7,31 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbDir = path.join(__dirname, '../../data');
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+// Base de datos:
+// - Producción (Vercel): Turso en la nube, vía TURSO_DATABASE_URL + TURSO_AUTH_TOKEN.
+// - Tests: memoria.
+// - Desarrollo local: archivo SQLite en server/data/amoremio.db.
+function resolveDbConfig() {
+  if (process.env.NODE_ENV === 'test') {
+    return { url: ':memory:' };
+  }
+  if (process.env.TURSO_DATABASE_URL) {
+    return {
+      url: process.env.TURSO_DATABASE_URL,
+      authToken: process.env.TURSO_AUTH_TOKEN
+    };
+  }
+  if (process.env.VERCEL) {
+    throw new Error('Falta configurar TURSO_DATABASE_URL y TURSO_AUTH_TOKEN en Vercel.');
+  }
+  const dbDir = path.join(__dirname, '../../data');
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+  return { url: `file:${path.join(dbDir, 'amoremio.db')}` };
 }
 
-const dbPath = process.env.NODE_ENV === 'test' 
-  ? ':memory:' 
-  : `file:${path.join(dbDir, 'amoremio.db')}`;
-
-export const client = createClient({
-  url: dbPath
-});
+export const client = createClient(resolveDbConfig());
 
 export async function initDb() {
   // Enable foreign keys
@@ -160,7 +173,7 @@ export async function initDb() {
     )
   `);
 
-  // Seed default Users if missing
+  // Seed default Users if missing (nunca se pisa una contraseña ya cambiada)
   const adminRes = await client.execute({
     sql: 'SELECT id FROM users WHERE email = ?',
     args: ['vampyfz1214@gmail.com']
@@ -171,13 +184,6 @@ export async function initDb() {
     await client.execute({
       sql: `INSERT INTO users (name, email, password_hash, role, must_change_password) VALUES (?, ?, ?, 'ADMIN', 1)`,
       args: ['Administrador Amore Mío', 'vampyfz1214@gmail.com', adminPass]
-    });
-  } else {
-    // Ensure initial provisional password is updated
-    const adminPass = bcrypt.hashSync('qwerty1234', 10);
-    await client.execute({
-      sql: `UPDATE users SET password_hash = ?, must_change_password = 1 WHERE email = ?`,
-      args: [adminPass, 'vampyfz1214@gmail.com']
     });
   }
 
@@ -191,12 +197,6 @@ export async function initDb() {
     await client.execute({
       sql: `INSERT INTO users (name, email, password_hash, role, must_change_password) VALUES (?, ?, ?, 'SUPERADMIN', 1)`,
       args: ['Soporte RolΦ Studio', 'martinchiacchio.seg@gmail.com', superPass]
-    });
-  } else {
-    const superPass = bcrypt.hashSync('qwerty1234', 10);
-    await client.execute({
-      sql: `UPDATE users SET password_hash = ?, must_change_password = 1 WHERE email = ?`,
-      args: [superPass, 'martinchiacchio.seg@gmail.com']
     });
   }
 

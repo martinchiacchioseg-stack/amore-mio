@@ -40,6 +40,30 @@ if (fs.existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath));
 }
 
+// Inicializa la base de datos una sola vez (necesario en Vercel serverless,
+// donde no hay un "arranque" tradicional del servidor).
+let dbReady = null;
+export function ensureDb() {
+  if (!dbReady) {
+    dbReady = initDb().catch((err) => {
+      dbReady = null;
+      throw err;
+    });
+  }
+  return dbReady;
+}
+
+app.use('/api', async (req, res, next) => {
+  if (process.env.NODE_ENV === 'test') return next();
+  try {
+    await ensureDb();
+    next();
+  } catch (err) {
+    console.error('Error al inicializar la base de datos:', err);
+    res.status(500).json({ error: 'No se pudo conectar a la base de datos.', detail: err.message });
+  }
+});
+
 // API Routes
 app.use('/api/auth', authRouter);
 app.use('/api/suppliers', suppliersRouter);
@@ -53,7 +77,7 @@ app.use('/api/reports', reportsRouter);
 app.use('/api/superadmin', superadminRouter);
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', app: 'Amore Mío API', producer: 'Roldfy Studio' });
+  res.json({ status: 'OK', app: 'Amore Mío API', producer: 'RolΦ Studio' });
 });
 
 // Fallback for SPA routing if client dist exists
@@ -66,13 +90,13 @@ if (fs.existsSync(clientDistPath)) {
   });
 }
 
-// Initialize database schema and start server if not testing
-if (process.env.NODE_ENV !== 'test') {
-  initDb()
+// Initialize database schema and start server (solo local; en Vercel se exporta la app)
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
+  ensureDb()
     .then(() => {
       app.listen(PORT, () => {
         console.log(`🌸 Servidor Amore Mío corriendo exitosamente en el puerto ${PORT}`);
-        console.log(`✨ Desarrollado por Roldfy Studio`);
+        console.log(`✨ Desarrollado por RolΦ Studio`);
       });
     })
     .catch((err) => {
