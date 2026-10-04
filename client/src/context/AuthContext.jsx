@@ -26,7 +26,11 @@ export function AuthProvider({ children }) {
       setLoading(false);
       return {
         success: false,
-        error: err.response?.data?.error || 'Error al iniciar sesión'
+        error: err.response?.data?.error
+          ? err.response.data.error + (err.response.data.detail ? ` (${err.response.data.detail})` : '')
+          : err.response
+            ? `El servidor no respondió correctamente (código ${err.response.status}).`
+            : 'No hay conexión con el servidor.'
       };
     }
   };

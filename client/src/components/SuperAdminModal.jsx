@@ -31,7 +31,14 @@ export default function SuperAdminModal({ onClose }) {
       setHealthData(healthRes.data);
       setAuthenticated(true);
     } catch (err) {
-      setError(err.response?.data?.error || 'Credenciales de SuperAdministrador inválidas.');
+      const apiError = err.response?.data?.error;
+      if (apiError) {
+        setError(apiError + (err.response?.data?.detail ? ` (${err.response.data.detail})` : ''));
+      } else if (err.response) {
+        setError(`El servidor no respondió correctamente (código ${err.response.status}). El backend no está publicado o no puede conectarse a la base de datos.`);
+      } else {
+        setError('No hay conexión con el servidor.');
+      }
     } finally {
       setLoading(false);
     }
