@@ -183,20 +183,20 @@ export async function initDb() {
 
   const superRes = await client.execute({
     sql: 'SELECT id FROM users WHERE email = ?',
-    args: ['martinchiacchio@gmail.com']
+    args: ['martinchiacchio.seg@gmail.com']
   });
 
   if (superRes.rows.length === 0) {
     const superPass = bcrypt.hashSync('qwerty1234', 10);
     await client.execute({
       sql: `INSERT INTO users (name, email, password_hash, role, must_change_password) VALUES (?, ?, ?, 'SUPERADMIN', 1)`,
-      args: ['Soporte Roldfy Studio', 'martinchiacchio@gmail.com', superPass]
+      args: ['Soporte RolΦ Studio', 'martinchiacchio.seg@gmail.com', superPass]
     });
   } else {
     const superPass = bcrypt.hashSync('qwerty1234', 10);
     await client.execute({
       sql: `UPDATE users SET password_hash = ?, must_change_password = 1 WHERE email = ?`,
-      args: [superPass, 'martinchiacchio@gmail.com']
+      args: [superPass, 'martinchiacchio.seg@gmail.com']
     });
   }
 

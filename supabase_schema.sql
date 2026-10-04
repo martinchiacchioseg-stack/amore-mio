@@ -130,9 +130,9 @@ INSERT INTO users (name, email, password_hash, role, must_change_password)
 VALUES ('Administrador Amore Mío', 'vampyfz1214@gmail.com', '$2a$10$w8T9V.w.xX8ZqT8y9.y9ueS1vN6V6V6V6V6V6V6V6V6V6V6V6V6V6', 'ADMIN', 1)
 ON CONFLICT (email) DO NOTHING;
 
--- SuperAdministrador Roldfy Studio (martinchiacchio@gmail.com / qwerty1234)
+-- SuperAdministrador RolΦ Studio (martinchiacchio.seg@gmail.com / qwerty1234)
 INSERT INTO users (name, email, password_hash, role, must_change_password)
-VALUES ('Soporte Roldfy Studio', 'martinchiacchio@gmail.com', '$2a$10$w8T9V.w.xX8ZqT8y9.y9ueS1vN6V6V6V6V6V6V6V6V6V6V6V6V6V6', 'SUPERADMIN', 1)
+VALUES ('Soporte RolΦ Studio', 'martinchiacchio.seg@gmail.com', '$2a$10$w8T9V.w.xX8ZqT8y9.y9ueS1vN6V6V6V6V6V6V6V6V6V6V6V6V6V6', 'SUPERADMIN', 1)
 ON CONFLICT (email) DO NOTHING;
 
 -- Vendedor de Ejemplo (vendedor@amoremio.com / vendedor123)

@@ -3,7 +3,7 @@ import api from '../services/api';
 import { Shield, Server, Database, X, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function SuperAdminModal({ onClose }) {
-  const [email, setEmail] = useState('martinchiacchio@gmail.com');
+  const [email, setEmail] = useState('martinchiacchio.seg@gmail.com');
   const [password, setPassword] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
   const [healthData, setHealthData] = useState(null);
