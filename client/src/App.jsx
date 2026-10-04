@@ -39,11 +39,12 @@ export default function App() {
 
       <div className="flex-1">
         <Routes>
-          {/* 1. Landing Page Pública (Catálogo) */}
-          <Route path="/" element={<PublicCatalog />} />
-
-          {/* 2. Login Staff */}
+          {/* 1. Ingreso Directo al Sistema de Gestión del Negocio */}
+          <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
+
+          {/* 2. Catálogo Online Público para Clientes */}
+          <Route path="/catalogo" element={<PublicCatalog />} />
 
           {/* 3. Panel de Gestión Interno (Protegido por Rol) */}
           <Route path="/app/sales" element={
