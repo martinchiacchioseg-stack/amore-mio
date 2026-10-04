@@ -191,9 +191,10 @@ export default function SalesPOS() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
       
       {/* Minimal Title Bar */}
-      <div className="flex items-center justify-between bg-gradient-to-r from-brand-50 to-white p-3 md:p-4 rounded-xl border border-brand-100 shadow-sm">
-        <div className="flex items-center">
-          <div className="p-2 bg-brand-100 text-brand-600 rounded-lg mr-3">
+      <div className="flex items-center justify-between bg-gradient-to-r from-brand-100 to-white p-3 md:p-4 rounded-xl border border-brand-200 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-brand-300 rounded-full blur-3xl opacity-20 pointer-events-none"></div>
+        <div className="flex items-center relative z-10">
+          <div className="p-2 bg-white text-brand-600 rounded-lg mr-3 shadow-sm border border-brand-100">
             <ShoppingCart className="w-5 h-5" />
           </div>
           <div>
@@ -203,12 +204,12 @@ export default function SalesPOS() {
         </div>
 
         {user && (
-          <div className="flex items-center space-x-2 text-right">
+          <div className="flex items-center space-x-2 text-right relative z-10">
             <div className="hidden sm:block">
               <span className="text-[10px] uppercase font-bold text-brand-600 block leading-tight">Vendedor en Caja</span>
               <span className="text-xs font-extrabold text-brand-900">{user.name}</span>
             </div>
-            <div className="bg-white border border-brand-200 px-2 py-1 rounded-lg">
+            <div className="bg-white border border-brand-200 px-2 py-1 rounded-lg shadow-sm">
               <span className="text-[9px] text-brand-500 block leading-none font-bold">COMISIÓN</span>
               <span className="text-xs text-brand-800 font-bold">{user.commission_type === 'PERCENTAGE' ? `${user.commission_value}%` : `$${user.commission_value}`}</span>
             </div>
@@ -217,7 +218,7 @@ export default function SalesPOS() {
       </div>
 
       {lastCompletedSale && (
-        <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex items-center justify-between">
+        <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
           <div className="flex items-center space-x-3">
             <CheckCircle2 className="w-6 h-6 text-emerald-600 flex-shrink-0" />
             <div>
@@ -234,7 +235,7 @@ export default function SalesPOS() {
               href={`/api/sales/${lastCompletedSale.id}/pdf?token=${localStorage.getItem('amoremio_token')}`}
               target="_blank"
               rel="noreferrer"
-              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition"
+              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition shadow-sm"
             >
               Descargar Ticket
             </a>
@@ -249,20 +250,23 @@ export default function SalesPOS() {
       )}
 
       {error && (
-        <div className="bg-rose-50 border border-rose-200 p-4 rounded-2xl text-rose-700 text-xs flex items-center space-x-2">
+        <div className="bg-rose-50 border border-rose-200 p-4 rounded-2xl text-rose-700 text-xs flex items-center space-x-2 shadow-sm">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* POS Main Content: Single Column Invoice Style */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-        
-        {/* Top Controls: Search & Select Customer */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 pb-6 border-b border-slate-100">
-          
-          {/* Customer Picker */}
-          <div>
+      <div className="bg-white/90 backdrop-blur-sm p-6 rounded-3xl border-2 border-brand-100 shadow-xl shadow-brand-100/40 flex flex-col relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-brand-100/40 to-transparent rounded-bl-full pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-brand-50/50 to-transparent rounded-tr-full pointer-events-none"></div>
+
+        <div className="relative z-10">
+          {/* Top Controls: Search & Select Customer */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 pb-6 border-b border-brand-100/50">
+            
+            {/* Customer Picker */}
+            <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-xs font-bold text-slate-700 flex items-center">
                 <User className="w-4 h-4 mr-1 text-brand-600" />
@@ -514,13 +518,12 @@ export default function SalesPOS() {
             <button
               onClick={handleCompleteSale}
               disabled={loading || cart.length === 0}
-              className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl text-sm transition shadow-lg shadow-brand-600/30 flex items-center justify-center space-x-2 disabled:opacity-50"
+              className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl text-sm transition shadow-lg shadow-brand-600/30 flex items-center justify-center space-x-2 disabled:opacity-50 mt-4"
             >
               <FileCheck className="w-4 h-4" />
               <span>{loading ? 'Procesando Venta...' : 'REGISTRAR VENTA Y COBRAR'}</span>
             </button>
           </div>
-
         </div>
 
       </div>
