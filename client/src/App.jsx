@@ -14,6 +14,7 @@ import CashRegister from './pages/CashRegister';
 import Suppliers from './pages/Suppliers';
 import Dashboard from './pages/Dashboard';
 import UsersConfig from './pages/UsersConfig';
+import InteractiveDemo from './pages/InteractiveDemo';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user } = useContext(AuthContext);
@@ -31,7 +32,7 @@ function ProtectedRoute({ children, allowedRoles }) {
 
 export default function App() {
   const location = useLocation();
-  const isPublicPage = location.pathname === '/' || location.pathname === '/login' || location.pathname.startsWith('/catalogo');
+  const isPublicPage = location.pathname === '/' || location.pathname === '/login' || location.pathname.startsWith('/catalogo') || location.pathname === '/tour';
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-100">
@@ -45,6 +46,9 @@ export default function App() {
 
           {/* 2. Catálogo Online Público para Clientes */}
           <Route path="/catalogo" element={<PublicCatalog />} />
+          
+          {/* Tour Interactivo */}
+          <Route path="/tour" element={<InteractiveDemo />} />
 
           {/* 3. Panel de Gestión Interno (Protegido por Rol) */}
           <Route path="/app/sales" element={
