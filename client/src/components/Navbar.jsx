@@ -13,7 +13,8 @@ import {
   LogOut, 
   Store,
   Menu,
-  X
+  X,
+  HelpCircle
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -92,12 +93,23 @@ export default function Navbar() {
             <Link 
               to="/catalogo" 
               target="_blank" 
-              className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
+              className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition hidden sm:inline-flex"
               title="Ver Catálogo Online Público"
             >
               <Store className="w-3.5 h-3.5 mr-1 text-brand-600" />
-              Catálogo Web
+              Catálogo
             </Link>
+            
+            <a 
+              href="/assets/Manual_Amore_Mio.pdf" 
+              target="_blank" 
+              rel="noreferrer"
+              className="inline-flex items-center px-2.5 py-1.5 text-xs font-bold text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200 rounded-lg transition"
+              title="Manual de Usuario PDF"
+            >
+              <HelpCircle className="w-3.5 h-3.5 sm:mr-1 text-brand-600" />
+              <span className="hidden sm:inline">Manual</span>
+            </a>
 
             {user ? (
               <div className="flex items-center space-x-2 border-l border-slate-200 pl-3">
