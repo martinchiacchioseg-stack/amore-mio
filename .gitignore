@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Production builds
+dist/
+build/
+
+# Databases & local storage
+*.db
+*.sqlite
+data/
+server/data/
+
+# Uploads
+server/public/uploads/*
+!server/public/uploads/.gitkeep
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# System files
+.DS_Store
+Thumbs.db
