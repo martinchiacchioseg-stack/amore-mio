@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import PasswordChangeModal from '../components/PasswordChangeModal';
+import SuperAdminModal from '../components/SuperAdminModal';
 import { Lock, Mail, AlertCircle, ArrowRight, Sparkles } from 'lucide-react';
 
 export default function Login() {
@@ -13,6 +14,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showForcedPasswordModal, setShowForcedPasswordModal] = useState(false);
+  const [showSuperAdminModal, setShowSuperAdminModal] = useState(false);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -123,15 +125,27 @@ export default function Login() {
             <span className="text-[11px] text-slate-400 block mb-3 font-semibold tracking-wider">
               DESARROLLADO POR
             </span>
-            <img 
-              src="/assets/rolphi.jpg" 
-              alt="RolΦ Studio" 
-              className="h-10 w-auto object-contain rounded opacity-90 hover:opacity-100 transition-opacity" 
-            />
+            <button
+              type="button"
+              onClick={() => setShowSuperAdminModal(true)}
+              className="focus:outline-none transition-transform hover:scale-105 active:scale-95"
+              title="Acceso SuperAdministrador"
+            >
+              <img 
+                src="/assets/rolphi.jpg" 
+                alt="RolΦ Studio" 
+                className="h-10 w-auto object-contain rounded opacity-90 hover:opacity-100 transition-opacity cursor-pointer" 
+              />
+            </button>
           </div>
 
         </div>
       </div>
+
+      {/* SuperAdmin Modal */}
+      {showSuperAdminModal && (
+        <SuperAdminModal onClose={() => setShowSuperAdminModal(false)} />
+      )}
 
       {/* Forced Password Modal */}
       {showForcedPasswordModal && (
