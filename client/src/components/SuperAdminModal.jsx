@@ -48,9 +48,7 @@ export default function SuperAdminModal({ onClose }) {
         </button>
 
         <div className="flex items-center space-x-3 mb-5">
-          <div className="p-3 bg-brand-600/20 text-brand-400 rounded-xl border border-brand-500/30 font-extrabold text-xl font-mono">
-            RolΦ
-          </div>
+          <img src="/assets/rolphi.jpg" alt="RolΦ Studio" className="h-14 w-auto object-contain rounded-xl" />
           <div>
             <h3 className="text-lg font-bold text-white flex items-center">
               Supervisión Técnica <span className="text-brand-400 ml-1">RolΦ Studio</span>

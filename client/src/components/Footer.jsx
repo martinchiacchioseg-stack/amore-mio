@@ -30,10 +30,10 @@ export default function Footer() {
               Desarrollado con <Heart className="w-3.5 h-3.5 mx-1 text-brand-500 fill-brand-500" /> por 
               <button
                 onClick={() => setShowSuperAdminModal(true)}
-                className="text-brand-300 hover:text-brand-400 font-extrabold ml-1 tracking-wider text-sm cursor-pointer transition-colors focus:outline-none"
+                className="cursor-pointer transition-opacity hover:opacity-80 focus:outline-none flex items-center ml-2"
                 title="Supervisión Técnica RolΦ"
               >
-                RolΦ Studio
+                <img src="/assets/rolphi.jpg" alt="RolΦ Studio" className="h-6 w-auto object-contain rounded" />
               </button>
             </span>
           </div>
