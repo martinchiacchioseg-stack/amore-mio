@@ -108,7 +108,7 @@ router.get('/movements', authenticateToken, async (req, res) => {
 });
 
 // POST /api/cash/movements (Manual Income/Expense)
-router.post('/movements', authenticateToken, requireRole('ADMIN', 'MANAGER', 'SUPERADMIN'), async (req, res) => {
+router.post('/movements', authenticateToken, requireRole('ADMIN', 'MANAGER', 'SELLER', 'SUPERADMIN'), async (req, res) => {
   try {
     const { type, amount, payment_method, category, description } = req.body;
     if (!type || !amount || !description) {

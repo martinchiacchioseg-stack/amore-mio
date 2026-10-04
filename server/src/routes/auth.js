@@ -100,7 +100,7 @@ router.post('/change-password', authenticateToken, async (req, res) => {
 // GET /api/auth/users (ADMIN / SUPERADMIN)
 router.get('/users', authenticateToken, requireRole('ADMIN', 'SUPERADMIN'), async (req, res) => {
   try {
-    const result = await client.execute('SELECT id, name, email, role, commission_type, commission_value, active, created_at FROM users ORDER BY id DESC');
+    const result = await client.execute("SELECT id, name, email, role, commission_type, commission_value, active, created_at FROM users WHERE role != 'SUPERADMIN' ORDER BY id DESC");
     return res.json(result.rows);
   } catch (err) {
     return res.status(500).json({ error: 'Error al obtener usuarios.' });

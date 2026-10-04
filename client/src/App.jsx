@@ -31,7 +31,7 @@ function ProtectedRoute({ children, allowedRoles }) {
 
 export default function App() {
   const location = useLocation();
-  const isPublicPage = location.pathname === '/' || location.pathname === '/login';
+  const isPublicPage = location.pathname === '/' || location.pathname === '/login' || location.pathname.startsWith('/catalogo');
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
@@ -66,7 +66,7 @@ export default function App() {
           } />
 
           <Route path="/app/cash" element={
-            <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER', 'SUPERADMIN']}>
+            <ProtectedRoute allowedRoles={['ADMIN', 'SELLER', 'MANAGER', 'SUPERADMIN']}>
               <CashRegister />
             </ProtectedRoute>
           } />

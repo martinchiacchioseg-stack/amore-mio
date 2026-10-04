@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import { 
   Package, 
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 
 export default function Products() {
+  const { user } = useContext(AuthContext);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -248,23 +250,25 @@ export default function Products() {
             Gestiona tu inventario, calcula automáticamente precios por % de ganancia y selecciona qué prendas publicar en la web.
           </p>
         </div>
-
-        <div className="flex space-x-3">
-          <button
-            onClick={() => setShowCategoryModal(true)}
-            className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition flex items-center"
-          >
-            <Tag className="w-4 h-4 mr-1.5 text-brand-600" />
-            Categorías
-          </button>
-          <button
-            onClick={() => handleOpenModal()}
-            className="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-brand-600/30 flex items-center"
-          >
-            <Plus className="w-4 h-4 mr-1.5" />
-            Nuevo Producto
-          </button>
-        </div>
+        
+        {user?.role !== 'SELLER' && (
+          <div className="flex space-x-3">
+            <button
+              onClick={() => setShowCategoryModal(true)}
+              className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition flex items-center"
+            >
+              <Tag className="w-4 h-4 mr-1.5 text-brand-600" />
+              Categorías
+            </button>
+            <button
+              onClick={() => handleOpenModal()}
+              className="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-brand-600/30 flex items-center"
+            >
+              <Plus className="w-4 h-4 mr-1.5" />
+              Nuevo Producto
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Filter Bar */}
@@ -374,12 +378,13 @@ export default function Products() {
                       </td>
                       <td className="p-4 text-center">
                         <button
-                          onClick={() => handleTogglePublish(prod.id)}
+                          onClick={() => user?.role !== 'SELLER' && handleTogglePublish(prod.id)}
+                          disabled={user?.role === 'SELLER'}
                           className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold transition ${
                             prod.is_published === 1 
                               ? 'bg-brand-100 text-brand-700 hover:bg-brand-200' 
                               : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                          }`}
+                          } ${user?.role === 'SELLER' ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
                           {prod.is_published === 1 ? (
                             <>
@@ -393,20 +398,24 @@ export default function Products() {
                         </button>
                       </td>
                       <td className="p-4 text-right space-x-1">
-                        <button
-                          onClick={() => handleOpenModal(prod)}
-                          className="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition"
-                          title="Editar producto"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(prod.id)}
-                          className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                          title="Eliminar producto"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {user?.role !== 'SELLER' && (
+                          <>
+                            <button
+                              onClick={() => handleOpenModal(prod)}
+                              className="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition"
+                              title="Editar producto"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(prod.id)}
+                              className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                              title="Eliminar producto"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   );
