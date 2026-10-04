@@ -28,19 +28,14 @@ export default function Footer() {
           <div className="flex items-center space-x-4 text-xs">
             <span className="inline-flex items-center text-slate-400">
               Desarrollado con <Heart className="w-3.5 h-3.5 mx-1 text-brand-500 fill-brand-500" /> por 
-              <span className="text-brand-300 font-extrabold ml-1 tracking-wider text-sm">RolΦ Studio</span>
+              <button
+                onClick={() => setShowSuperAdminModal(true)}
+                className="text-brand-300 hover:text-brand-400 font-extrabold ml-1 tracking-wider text-sm cursor-pointer transition-colors focus:outline-none"
+                title="Supervisión Técnica RolΦ"
+              >
+                RolΦ Studio
+              </button>
             </span>
-
-            <span className="text-slate-700">|</span>
-
-            <button
-              onClick={() => setShowSuperAdminModal(true)}
-              className="text-slate-500 hover:text-slate-300 transition-colors flex items-center space-x-1 text-[11px] opacity-75 hover:opacity-100"
-              title="Supervisión Técnica RolΦ"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
-              <span>Acceso RolΦ</span>
-            </button>
           </div>
         </div>
       </div>
