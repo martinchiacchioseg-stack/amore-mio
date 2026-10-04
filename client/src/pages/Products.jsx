@@ -474,7 +474,16 @@ export default function Products() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Categoría</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700">Categoría</label>
+                    <button 
+                      type="button" 
+                      onClick={() => setShowCategoryModal(true)}
+                      className="text-[10px] text-brand-600 font-bold hover:text-brand-800 flex items-center"
+                    >
+                      <Plus className="w-3 h-3 mr-0.5" /> Nueva
+                    </button>
+                  </div>
                   <select
                     value={formData.category_id}
                     onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}

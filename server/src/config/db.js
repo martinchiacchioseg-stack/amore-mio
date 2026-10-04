@@ -173,6 +173,14 @@ export async function initDb() {
     )
   `);
 
+  // 10. System Settings
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS system_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    )
+  `);
+
   // Seed default Users if missing (nunca se pisa una contraseña ya cambiada)
   const adminRes = await client.execute({
     sql: 'SELECT id FROM users WHERE email = ?',
@@ -197,6 +205,20 @@ export async function initDb() {
     await client.execute({
       sql: `INSERT INTO users (name, email, password_hash, role, must_change_password) VALUES (?, ?, ?, 'SUPERADMIN', 1)`,
       args: ['Soporte RolΦ Studio', 'martinchiacchio.seg@gmail.com', superPass]
+    });
+  }
+
+  // Seed default license if missing
+  const licenseRes = await client.execute({
+    sql: 'SELECT value FROM system_settings WHERE key = ?',
+    args: ['license_expiration']
+  });
+  if (licenseRes.rows.length === 0) {
+    const expireDate = new Date();
+    expireDate.setFullYear(expireDate.getFullYear() + 10); // Default to 10 years
+    await client.execute({
+      sql: 'INSERT INTO system_settings (key, value) VALUES (?, ?)',
+      args: ['license_expiration', expireDate.toISOString()]
     });
   }
 

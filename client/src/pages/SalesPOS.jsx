@@ -35,6 +35,10 @@ export default function SalesPOS() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Inline Customer Creation
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', email: '', document_number: '' });
   const [lastCompletedSale, setLastCompletedSale] = useState(null);
 
   useEffect(() => {
@@ -168,26 +172,46 @@ export default function SalesPOS() {
     p.code.toLowerCase().includes(searchProduct.toLowerCase())
   );
 
+  const handleSaveCustomer = async (e) => {
+    e.preventDefault();
+    if (!newCustomer.name || !newCustomer.phone) return;
+    try {
+      const res = await api.post('/customers', newCustomer);
+      const createdId = res.data.id;
+      await loadCustomers();
+      setSelectedCustomerId(createdId);
+      setShowCustomerModal(false);
+      setNewCustomer({ name: '', phone: '', email: '', document_number: '' });
+    } catch (err) {
+      alert('Error al crear cliente: ' + (err.response?.data?.error || err.message));
+    }
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
       
-      {/* Title */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center">
-            <ShoppingCart className="w-6 h-6 mr-2 text-brand-600" />
-            Punto de Venta (POS)
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Registro ágil de ventas al contado y a cuenta corriente con desglose automático de comisión y ganancia.
-          </p>
+      {/* Minimal Title Bar */}
+      <div className="flex items-center justify-between bg-gradient-to-r from-brand-50 to-white p-3 md:p-4 rounded-xl border border-brand-100 shadow-sm">
+        <div className="flex items-center">
+          <div className="p-2 bg-brand-100 text-brand-600 rounded-lg mr-3">
+            <ShoppingCart className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-lg font-extrabold text-brand-950 leading-none">Punto de Venta</h1>
+            <p className="text-[10px] text-brand-700 font-medium mt-1 uppercase tracking-wider">Módulo de Facturación</p>
+          </div>
         </div>
 
         {user && (
-          <div className="bg-brand-50 border border-brand-200 px-4 py-2 rounded-xl text-right">
-            <span className="text-[10px] uppercase font-bold text-brand-700 block">Vendedor en Caja</span>
-            <span className="text-sm font-bold text-slate-900">{user.name}</span>
-            <span className="text-xs text-brand-600 block">Comisión: {user.commission_type === 'PERCENTAGE' ? `${user.commission_value}%` : `$${user.commission_value}`}</span>
+          <div className="flex items-center space-x-2 text-right">
+            <div className="hidden sm:block">
+              <span className="text-[10px] uppercase font-bold text-brand-600 block leading-tight">Vendedor en Caja</span>
+              <span className="text-xs font-extrabold text-brand-900">{user.name}</span>
+            </div>
+            <div className="bg-white border border-brand-200 px-2 py-1 rounded-lg">
+              <span className="text-[9px] text-brand-500 block leading-none font-bold">COMISIÓN</span>
+              <span className="text-xs text-brand-800 font-bold">{user.commission_type === 'PERCENTAGE' ? `${user.commission_value}%` : `$${user.commission_value}`}</span>
+            </div>
           </div>
         )}
       </div>
@@ -300,10 +324,19 @@ export default function SalesPOS() {
             
             {/* Customer Picker */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center">
-                <User className="w-3.5 h-3.5 mr-1 text-brand-600" />
-                Cliente de la Venta
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 flex items-center">
+                  <User className="w-3.5 h-3.5 mr-1 text-brand-600" />
+                  Cliente de la Venta
+                </label>
+                <button 
+                  type="button" 
+                  onClick={() => setShowCustomerModal(true)}
+                  className="text-[10px] text-brand-600 font-bold hover:text-brand-800 flex items-center bg-brand-50 px-2 py-0.5 rounded-lg border border-brand-200"
+                >
+                  <Plus className="w-3 h-3 mr-0.5" /> Nuevo
+                </button>
+              </div>
               <select
                 value={selectedCustomerId}
                 onChange={(e) => setSelectedCustomerId(e.target.value)}
@@ -488,6 +521,50 @@ export default function SalesPOS() {
         </div>
 
       </div>
+
+      {/* Inline Customer Modal */}
+      {showCustomerModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Nuevo Cliente</h3>
+            <form onSubmit={handleSaveCustomer} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Nombre Completo *</label>
+                <input
+                  type="text"
+                  required
+                  value={newCustomer.name}
+                  onChange={e => setNewCustomer({...newCustomer, name: e.target.value})}
+                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-brand-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Teléfono / WhatsApp *</label>
+                <input
+                  type="text"
+                  required
+                  value={newCustomer.phone}
+                  onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
+                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-brand-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Email (Opcional)</label>
+                <input
+                  type="email"
+                  value={newCustomer.email}
+                  onChange={e => setNewCustomer({...newCustomer, email: e.target.value})}
+                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-brand-500 outline-none"
+                />
+              </div>
+              <div className="flex justify-end space-x-2 pt-2">
+                <button type="button" onClick={() => setShowCustomerModal(false)} className="px-4 py-2 text-xs text-slate-600 font-bold">Cancelar</button>
+                <button type="submit" className="px-4 py-2 text-xs bg-brand-600 text-white font-bold rounded-xl">Crear Cliente</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

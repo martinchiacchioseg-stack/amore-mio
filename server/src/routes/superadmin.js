@@ -12,13 +12,16 @@ router.get('/health', authenticateToken, requireRole('SUPERADMIN'), async (req, 
     const salesCount = (await client.execute('SELECT COUNT(*) as count FROM sales')).rows[0].count;
     const customersCount = (await client.execute('SELECT COUNT(*) as count FROM customers')).rows[0].count;
     const movementsCount = (await client.execute('SELECT COUNT(*) as count FROM cash_movements')).rows[0].count;
+    const licenseRes = await client.execute({ sql: 'SELECT value FROM system_settings WHERE key = ?', args: ['license_expiration'] });
+    const licenseExpiration = licenseRes.rows.length > 0 ? licenseRes.rows[0].value : null;
 
     return res.json({
       producer: {
         studio: 'RolΦ Studio',
         developer: 'Soporte Técnico RolΦ',
         contact: 'soporte@rolphi.com',
-        version: '1.0.0-PROD'
+        version: '1.0.0-PROD',
+        licenseExpiration
       },
       system: {
         nodeVersion: process.version,
@@ -139,6 +142,31 @@ router.post('/diagnostics/run', authenticateToken, requireRole('SUPERADMIN'), as
     }
 
     return res.status(500).json({ success: false, logs, error: 'Inconsistencia detectada durante la prueba E2E.' });
+  }
+});
+
+// POST /api/superadmin/license/extend
+router.post('/license/extend', authenticateToken, requireRole('SUPERADMIN'), async (req, res) => {
+  try {
+    const { days } = req.body;
+    if (!days || isNaN(days)) return res.status(400).json({ error: 'Días inválidos.' });
+
+    const licenseRes = await client.execute({ sql: 'SELECT value FROM system_settings WHERE key = ?', args: ['license_expiration'] });
+    let baseDate = new Date();
+    if (licenseRes.rows.length > 0 && new Date(licenseRes.rows[0].value) > new Date()) {
+      baseDate = new Date(licenseRes.rows[0].value);
+    }
+    
+    baseDate.setDate(baseDate.getDate() + Number(days));
+    
+    await client.execute({
+      sql: 'UPDATE system_settings SET value = ? WHERE key = ?',
+      args: [baseDate.toISOString(), 'license_expiration']
+    });
+
+    return res.json({ success: true, newExpiration: baseDate.toISOString() });
+  } catch (err) {
+    return res.status(500).json({ error: 'Error al extender licencia.' });
   }
 });
 

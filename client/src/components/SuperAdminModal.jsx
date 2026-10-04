@@ -183,6 +183,31 @@ export default function SuperAdminModal({ onClose }) {
                 </div>
               </div>
             </div>
+
+            <div className="bg-slate-800/80 rounded-xl p-3 border border-slate-700 flex justify-between items-center">
+              <div>
+                <h4 className="text-xs font-bold text-slate-300">Licencia del Sistema</h4>
+                <p className="text-[10px] text-slate-400">Vence: {healthData?.producer?.licenseExpiration ? new Date(healthData.producer.licenseExpiration).toLocaleDateString('es-AR') : 'Indefinida'}</p>
+              </div>
+              <button 
+                onClick={async () => {
+                  const days = prompt('¿Cuántos días querés extender la licencia?');
+                  if (days && !isNaN(days)) {
+                    try {
+                      await api.post('/superadmin/license/extend', { days: Number(days) }, { headers: { Authorization: `Bearer ${tempToken}` } });
+                      alert(`Licencia extendida por ${days} días.`);
+                      const hr = await api.get('/superadmin/health', { headers: { Authorization: `Bearer ${tempToken}` } });
+                      setHealthData(hr.data);
+                    } catch(e) {
+                      alert('Error al extender licencia.');
+                    }
+                  }
+                }}
+                className="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white text-[10px] font-bold rounded-lg transition"
+              >
+                + Extender
+              </button>
+            </div>
             
             <div className="pt-2 border-t border-slate-700/60 mt-4">
               <button
