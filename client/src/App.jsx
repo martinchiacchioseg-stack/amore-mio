@@ -34,7 +34,7 @@ export default function App() {
   const isPublicPage = location.pathname === '/' || location.pathname === '/login' || location.pathname.startsWith('/catalogo');
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-slate-100">
       {!isPublicPage && <Navbar />}
 
       <div className="flex-1">

@@ -39,14 +39,14 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-white border-b border-brand-100 shadow-sm sticky top-0 z-40">
+    <header className="bg-slate-950 border-b border-brand-900/50 shadow-md sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           
           {/* Logo & Brand Name */}
           <div className="flex items-center space-x-3">
             <Link to="/" className="flex items-center space-x-3 group">
-              <div className="bg-white p-1 rounded-full border-2 border-brand-200 shadow-sm group-hover:scale-105 transition-transform">
+              <div className="p-0.5 rounded-full group-hover:scale-105 transition-transform">
                 <img 
                   src="/assets/logo_final.jpg" 
                   alt="Amore Mío Logo" 
@@ -54,10 +54,10 @@ export default function Navbar() {
                 />
               </div>
               <div>
-                <span className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 block leading-tight">
+                <span className="text-xl sm:text-2xl font-bold tracking-tight text-white block leading-tight group-hover:text-brand-300 transition-colors">
                   AMORE MÍO
                 </span>
-                <span className="text-[10px] sm:text-xs uppercase font-medium tracking-widest text-brand-600 block">
+                <span className="text-[10px] sm:text-xs uppercase font-medium tracking-widest text-brand-500 block">
                   Ropa Interior
                 </span>
               </div>
@@ -78,11 +78,11 @@ export default function Navbar() {
                       to={item.path}
                       className={`inline-flex items-center px-3 py-2 text-xs font-semibold rounded-lg transition-colors ${
                         isActive
-                          ? 'bg-brand-50 text-brand-700 font-bold border border-brand-200'
-                          : 'text-slate-600 hover:text-brand-600 hover:bg-slate-50'
+                          ? 'bg-brand-900/40 text-brand-300 font-bold border border-brand-800'
+                          : 'text-slate-300 hover:text-white hover:bg-slate-800'
                       }`}
                     >
-                      <Icon className="w-4 h-4 mr-1.5 text-brand-600" />
+                      <Icon className={`w-4 h-4 mr-1.5 ${isActive ? 'text-brand-400' : 'text-slate-400'}`} />
                       {item.label}
                     </Link>
                   );
@@ -95,10 +95,10 @@ export default function Navbar() {
             <Link 
               to="/catalogo" 
               target="_blank" 
-              className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition hidden sm:inline-flex"
+              className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white rounded-lg transition hidden sm:inline-flex"
               title="Ver Catálogo Online Público"
             >
-              <Store className="w-3.5 h-3.5 mr-1 text-brand-600" />
+              <Store className="w-3.5 h-3.5 mr-1 text-slate-400" />
               Catálogo
             </Link>
             
@@ -106,22 +106,22 @@ export default function Navbar() {
               href="/assets/Manual_Amore_Mio.pdf" 
               target="_blank" 
               rel="noreferrer"
-              className="inline-flex items-center px-2.5 py-1.5 text-xs font-bold text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200 rounded-lg transition"
+              className="inline-flex items-center px-2.5 py-1.5 text-xs font-bold text-brand-300 bg-brand-900/30 hover:bg-brand-900/60 border border-brand-700/50 rounded-lg transition"
               title="Manual de Usuario PDF"
             >
-              <HelpCircle className="w-3.5 h-3.5 sm:mr-1 text-brand-600" />
+              <HelpCircle className="w-3.5 h-3.5 sm:mr-1 text-brand-400" />
               <span className="hidden sm:inline">Manual</span>
             </a>
 
             {user ? (
-              <div className="flex items-center space-x-2 border-l border-slate-200 pl-3">
+              <div className="flex items-center space-x-2 border-l border-slate-700 pl-3">
                 <div className="text-right hidden sm:block">
-                  <span className="text-xs font-bold text-slate-800 block leading-tight">{user.name}</span>
-                  <span className="text-[10px] text-brand-600 uppercase font-semibold block">{user.role}</span>
+                  <span className="text-xs font-bold text-white block leading-tight">{user.name}</span>
+                  <span className="text-[10px] text-brand-400 uppercase font-semibold block">{user.role}</span>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                  className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 rounded-lg transition"
                   title="Cerrar sesión"
                 >
                   <LogOut className="w-4 h-4" />
@@ -130,7 +130,7 @@ export default function Navbar() {
             ) : (
               <Link
                 to="/login"
-                className="hidden md:inline-flex items-center px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition"
+                className="hidden md:inline-flex items-center px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-500 rounded-lg shadow-sm transition"
               >
                 Ingreso Personal
               </Link>
