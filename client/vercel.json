@@ -1,6 +1,8 @@
 {
   "framework": "vite",
+  "installCommand": "npm install && npm install --prefix ../server --omit=dev",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
   ]
 }
