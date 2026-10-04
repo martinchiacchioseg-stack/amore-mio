@@ -39,7 +39,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="w-full h-full flex-1 bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden py-16">
       {/* Background Glow Accents */}
       <div className="absolute -top-40 -right-40 w-96 h-96 bg-brand-600/20 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -119,10 +119,15 @@ export default function Login() {
           </form>
 
           {/* Footer note */}
-          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
-            <span className="text-[11px] text-slate-400 block">
-              Desarrollado por <strong className="text-slate-700 font-extrabold tracking-wider">RolΦ Studio</strong>
+          <div className="mt-8 pt-6 border-t border-slate-100 text-center flex flex-col items-center">
+            <span className="text-[11px] text-slate-400 block mb-3 font-semibold tracking-wider">
+              DESARROLLADO POR
             </span>
+            <img 
+              src="/assets/rolphi.jpg" 
+              alt="RolΦ Studio" 
+              className="h-10 w-auto object-contain rounded opacity-90 hover:opacity-100 transition-opacity" 
+            />
           </div>
 
         </div>
