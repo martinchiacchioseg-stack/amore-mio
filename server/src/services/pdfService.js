@@ -279,9 +279,16 @@ export function generateSaleTicketPDF(sale, items, res) {
   const doc = new PDFDocument({ margin: 45, size: 'A5' });
   doc.pipe(res);
 
-  drawHeader(doc, 'TICKET DE COMPRA', `Nº ${sale.sale_number} - ${new Date(sale.created_at).toLocaleDateString('es-AR')}`);
+  drawHeader(doc, 'PRESUPUESTO / REMITO', `Nº ${sale.sale_number} - ${new Date(sale.created_at).toLocaleDateString('es-AR')}`);
 
-  let y = 140;
+  // Draw X box for non-fiscal receipt (Argentine convention)
+  doc.rect(190, 40, 40, 40).strokeColor('#333').lineWidth(1).stroke();
+  doc.fontSize(28).font('Helvetica-Bold').fillColor('#333').text('X', 190, 48, { width: 40, align: 'center' });
+  doc.fontSize(6).font('Helvetica').text('DOCUMENTO', 190, 85, { width: 40, align: 'center' });
+  
+  doc.fontSize(8).font('Helvetica-Bold').fillColor('#888').text('DOCUMENTO NO VÁLIDO COMO COMPROBANTE FISCAL', 45, 120, { width: 320, align: 'center' });
+
+  let y = 145;
 
   // Customer Info
   doc.fontSize(10).font('Helvetica-Bold').fillColor('#333').text('Cliente:', 45, y);

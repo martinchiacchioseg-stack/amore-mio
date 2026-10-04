@@ -9,7 +9,8 @@ import {
   XCircle, 
   Sparkles, 
   Heart,
-  Tag
+  Tag,
+  Share2
 } from 'lucide-react';
 
 const FALLBACK_PRODUCTS = [
@@ -126,11 +127,16 @@ export default function PublicCatalog() {
     window.open('/api/catalog/pdf', '_blank');
   };
 
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.origin + '/catalogo');
+    alert('¡Enlace del catálogo copiado al portapapeles! Ya puedes pegarlo y enviarlo.');
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 via-brand-50/20 to-white">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-brand-50 via-white to-brand-100">
       {/* Compact Header */}
-      <header className="bg-slate-900 text-white py-4 border-b border-brand-500/20 sticky top-0 z-50 shadow-md">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-600/30 via-slate-900 to-slate-950"></div>
+      <header className="bg-brand-900 text-white py-4 border-b border-brand-800 sticky top-0 z-50 shadow-md">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-600/40 via-brand-900 to-brand-950"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
           
           <div className="flex items-center space-x-4">
@@ -151,6 +157,14 @@ export default function PublicCatalog() {
           </div>
 
           <div className="flex items-center space-x-3">
+            <button
+              onClick={handleCopyLink}
+              className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition shadow-sm border border-white/20"
+              title="Copiar enlace del catálogo"
+            >
+              <Share2 className="w-4 h-4 md:mr-1.5" />
+              <span className="hidden md:inline">Compartir Enlace</span>
+            </button>
             <button
               onClick={handleDownloadPDF}
               className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white transition shadow-sm"
