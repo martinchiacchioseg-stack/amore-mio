@@ -128,52 +128,48 @@ export default function PublicCatalog() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 via-brand-50/20 to-white">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-slate-900 text-white py-16 md:py-24 border-b border-brand-500/20">
+      {/* Compact Header */}
+      <header className="bg-slate-900 text-white py-4 border-b border-brand-500/20 sticky top-0 z-50 shadow-md">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-600/30 via-slate-900 to-slate-950"></div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center space-x-2 bg-brand-500/10 border border-brand-400/30 px-4 py-1.5 rounded-full text-brand-300 text-xs font-semibold uppercase tracking-widest mb-6 backdrop-blur-sm">
-            <Sparkles className="w-3.5 h-3.5 text-brand-400" />
-            <span>Colección Exclusiva • Amore Mío</span>
-          </div>
-
-          <div className="flex justify-center mb-6">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          
+          <div className="flex items-center space-x-4">
             <img 
               src="/assets/logo.jpg" 
               alt="Amore Mío Logo" 
-              className="h-28 w-28 md:h-36 md:w-36 rounded-full object-cover border-4 border-brand-400/40 shadow-2xl shadow-brand-500/20"
+              className="h-12 w-12 rounded-full object-cover border-2 border-brand-400/40 shadow-sm"
               onError={(e) => { e.target.style.display = 'none'; }}
             />
+            <div>
+              <h1 className="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-brand-100 to-brand-300 leading-none">
+                AMORE MÍO
+              </h1>
+              <p className="text-[10px] font-medium text-brand-200 tracking-wider uppercase mt-1">
+                Ropa Interior • Catálogo
+              </p>
+            </div>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-3 bg-clip-text text-transparent bg-gradient-to-r from-white via-brand-100 to-brand-300">
-            AMORE MÍO
-          </h1>
-          <p className="text-lg md:text-xl font-light text-brand-200 tracking-wider uppercase mb-8">
-            Ropa Interior • Para Él y Para Ella
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex items-center space-x-3">
             <button
               onClick={handleDownloadPDF}
-              className="inline-flex items-center px-6 py-3 rounded-full text-sm font-bold bg-gradient-to-r from-brand-500 to-brand-600 text-white hover:from-brand-600 hover:to-brand-700 transition shadow-lg shadow-brand-600/30 hover:scale-105"
+              className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white transition shadow-sm"
             >
-              <FileText className="w-4 h-4 mr-2" />
-              Descargar Catálogo en PDF
+              <FileText className="w-4 h-4 mr-1.5" />
+              Catálogo PDF
             </button>
             <a
               href="https://wa.me/5493416123456?text=¡Hola%20Amore%20Mío!%20Quería%20hacer%20una%20consulta%20general."
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center px-6 py-3 rounded-full text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-lg shadow-emerald-600/20 hover:scale-105"
+              className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-sm hidden sm:inline-flex"
             >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Contacto por WhatsApp
+              <MessageCircle className="w-4 h-4 mr-1.5" />
+              WhatsApp
             </a>
           </div>
         </div>
-      </section>
+      </header>
 
       {/* Main Content & Filters */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
