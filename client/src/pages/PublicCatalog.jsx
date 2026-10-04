@@ -142,7 +142,7 @@ export default function PublicCatalog() {
           <div className="flex items-center space-x-4">
             <div className="bg-white/10 p-1 rounded-full border-2 border-brand-400/40 shadow-sm">
               <img 
-                src="/assets/logo2.png" 
+                src="/assets/logo_final.jpg" 
                 alt="Amore Mío Logo" 
                 className="h-14 w-14 sm:h-16 sm:w-16 rounded-full object-contain bg-white"
                 onError={(e) => { e.target.style.display = 'none'; }}

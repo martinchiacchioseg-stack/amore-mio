@@ -48,7 +48,7 @@ export default function Navbar() {
             <Link to="/" className="flex items-center space-x-3 group">
               <div className="bg-white p-1 rounded-full border-2 border-brand-200 shadow-sm group-hover:scale-105 transition-transform">
                 <img 
-                  src="/assets/logo2.png" 
+                  src="/assets/logo_final.jpg" 
                   alt="Amore Mío Logo" 
                   className="h-12 w-12 sm:h-14 sm:w-14 rounded-full object-contain"
                 />

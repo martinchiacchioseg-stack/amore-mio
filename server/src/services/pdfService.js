@@ -7,9 +7,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const possiblePaths = [
-  path.join(process.cwd(), 'public/assets/logo2.png'), // Vercel
-  path.join(__dirname, '../../../client/public/assets/logo2.png'), // Local monorepo
-  path.join(__dirname, '../../public/assets/logo2.png') // Local server
+  path.join(process.cwd(), 'public/assets/logo_final.jpg'), // Vercel
+  path.join(__dirname, '../../../client/public/assets/logo_final.jpg'), // Local monorepo
+  path.join(__dirname, '../../public/assets/logo_final.jpg') // Local server
 ];
 const logoPath = possiblePaths.find(p => fs.existsSync(p));
 
