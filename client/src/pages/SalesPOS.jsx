@@ -32,6 +32,7 @@ export default function SalesPOS() {
   const [paymentMethod, setPaymentMethod] = useState('CASH'); // CASH, TRANSFER, QR, CREDIT_ACCOUNT
   const [discount, setDiscount] = useState(0);
   const [dueDays, setDueDays] = useState(30);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -263,85 +264,98 @@ export default function SalesPOS() {
 
         <div className="relative z-10">
           {/* Top Controls: Search & Select Customer */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 pb-6 border-b border-brand-100/50">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 p-5 bg-brand-50/80 border border-brand-200 rounded-2xl shadow-inner">
             
             {/* Customer Picker */}
             <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-bold text-slate-700 flex items-center">
-                <User className="w-4 h-4 mr-1 text-brand-600" />
-                Cliente de la Venta
-              </label>
-              <button 
-                type="button" 
-                onClick={() => setShowCustomerModal(true)}
-                className="text-[10px] text-brand-600 font-bold hover:text-brand-800 flex items-center bg-brand-50 px-2 py-0.5 rounded-lg border border-brand-200"
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-brand-900 flex items-center">
+                  <User className="w-4 h-4 mr-1 text-brand-600" />
+                  Cliente de la Venta
+                </label>
+                <button 
+                  type="button" 
+                  onClick={() => setShowCustomerModal(true)}
+                  className="text-[10px] text-white bg-brand-600 font-bold hover:bg-brand-700 flex items-center px-2.5 py-1 rounded-lg transition shadow-sm"
+                >
+                  <Plus className="w-3 h-3 mr-0.5" /> Nuevo
+                </button>
+              </div>
+              <select
+                value={selectedCustomerId}
+                onChange={(e) => setSelectedCustomerId(e.target.value)}
+                className="w-full border border-brand-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none font-semibold shadow-sm"
               >
-                <Plus className="w-3 h-3 mr-0.5" /> Nuevo
-              </button>
+                <option value="">-- Consumidor Final (Venta Anónima) --</option>
+                {customers.map(c => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} {c.credit_balance > 0 ? `(Deuda Cta.Cte: $${c.credit_balance.toLocaleString('es-AR')})` : ''}
+                  </option>
+                ))}
+              </select>
             </div>
-            <select
-              value={selectedCustomerId}
-              onChange={(e) => setSelectedCustomerId(e.target.value)}
-              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 bg-slate-50 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
-            >
-              <option value="">-- Consumidor Final (Venta Anónima) --</option>
-              {customers.map(c => (
-                <option key={c.id} value={c.id}>
-                  {c.name} {c.credit_balance > 0 ? `(Deuda Cta.Cte: $${c.credit_balance.toLocaleString('es-AR')})` : ''}
-                </option>
-              ))}
-            </select>
-          </div>
 
-          {/* Product Search Add */}
-          <div className="relative">
-            <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center">
-              <Search className="w-4 h-4 mr-1 text-brand-600" />
-              Buscar y Agregar Producto
-            </label>
+            {/* Product Search Add */}
             <div className="relative">
-              <input
-                type="text"
-                placeholder="Escribe el código o nombre..."
-                value={searchProduct}
-                onChange={(e) => setSearchProduct(e.target.value)}
-                className="w-full pl-4 pr-10 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white"
-              />
-              {searchProduct && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                  {filteredProducts.length === 0 ? (
-                    <div className="p-3 text-sm text-slate-500 text-center">No hay resultados</div>
-                  ) : (
-                    filteredProducts.map(prod => {
-                      const inStock = prod.stock > 0;
-                      return (
-                        <div 
-                          key={prod.id}
-                          onClick={() => {
-                            if (inStock) {
-                              addToCart(prod);
-                              setSearchProduct('');
-                            }
-                          }}
-                          className={`flex items-center justify-between p-3 border-b border-slate-50 hover:bg-slate-50 cursor-pointer ${!inStock ? 'opacity-50' : ''}`}
-                        >
-                          <div>
-                            <div className="text-sm font-bold text-slate-800">{prod.name}</div>
-                            <div className="text-xs text-slate-500">ART: {prod.code} | Stock: {prod.stock}</div>
+              <label className="block text-xs font-bold text-brand-900 mb-1.5 flex items-center">
+                <Search className="w-4 h-4 mr-1 text-brand-600" />
+                Buscar o Seleccionar Producto
+              </label>
+              <div 
+                className="relative"
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget)) {
+                    setTimeout(() => setShowDropdown(false), 200);
+                  }
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="Busca por nombre o hacé clic para ver todos..."
+                  value={searchProduct}
+                  onFocus={() => setShowDropdown(true)}
+                  onChange={(e) => {
+                    setSearchProduct(e.target.value);
+                    setShowDropdown(true);
+                  }}
+                  className="w-full pl-4 pr-10 py-2.5 text-sm border border-brand-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white shadow-sm font-semibold placeholder-slate-400"
+                />
+                {(showDropdown || searchProduct) && (
+                  <div className="absolute z-30 w-full mt-2 bg-white border border-brand-300 rounded-xl shadow-2xl max-h-72 overflow-y-auto">
+                    {filteredProducts.length === 0 ? (
+                      <div className="p-4 text-sm text-slate-500 text-center font-bold">No se encontraron productos</div>
+                    ) : (
+                      filteredProducts.map(prod => {
+                        const inStock = prod.stock > 0;
+                        return (
+                          <div 
+                            key={prod.id}
+                            onClick={() => {
+                              if (inStock) {
+                                addToCart(prod);
+                                setSearchProduct('');
+                                setShowDropdown(false);
+                              }
+                            }}
+                            className={`flex items-center justify-between p-3 border-b border-slate-100 hover:bg-brand-50 cursor-pointer transition ${!inStock ? 'opacity-50 bg-slate-50' : ''}`}
+                          >
+                            <div>
+                              <div className="text-sm font-bold text-slate-800">{prod.name}</div>
+                              <div className="text-[10px] font-bold text-brand-600 bg-brand-100 px-1.5 py-0.5 rounded inline-block mt-0.5">ART: {prod.code}</div>
+                              <div className="text-[10px] text-slate-500 inline-block ml-2">Stock: {prod.stock}</div>
+                            </div>
+                            <div className="text-brand-600 font-extrabold text-sm">
+                              ${prod.sale_price.toLocaleString('es-AR')}
+                            </div>
                           </div>
-                          <div className="text-brand-600 font-bold">
-                            ${prod.sale_price.toLocaleString('es-AR')}
-                          </div>
-                        </div>
-                      )
-                    })
-                  )}
-                </div>
-              )}
+                        )
+                      })
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
           
           <div className="space-y-4 flex-1 pr-1">
             
