@@ -106,15 +106,25 @@ router.get('/license', authenticateToken, requireRole('ADMIN', 'SUPERADMIN'), as
     });
 
     if (licenseRes.rows.length === 0) {
-      return res.json({ daysRemaining: 0 });
+      return res.json({ daysRemaining: 0, expirationDate: null });
     }
 
     const expDate = new Date(licenseRes.rows[0].value);
     const now = new Date();
-    const diffTime = expDate - now;
+    const diffTime = expDate.getTime() - now.getTime();
     const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    return res.json({ daysRemaining: daysRemaining > 0 ? daysRemaining : 0 });
+    // Format date as DD/MM/YYYY
+    const formattedDate = expDate.toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+    
+    return res.json({ 
+      daysRemaining: daysRemaining > 0 ? daysRemaining : 0,
+      expirationDate: formattedDate
+    });
   } catch (err) {
     console.error('Error fetching license:', err);
     return res.status(500).json({ error: 'Error al obtener licencia.' });

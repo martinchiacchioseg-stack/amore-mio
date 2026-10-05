@@ -24,12 +24,12 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [licenseDays, setLicenseDays] = useState(null);
+  const [licenseData, setLicenseData] = useState(null);
 
   useEffect(() => {
     if (user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN')) {
       api.get('/auth/license').then(res => {
-        setLicenseDays(res.data.daysRemaining);
+        setLicenseData(res.data);
       }).catch(err => console.error('Error fetching license:', err));
     }
   }, [user]);
@@ -95,13 +95,16 @@ export default function Navbar() {
 
           {/* User badge & Actions */}
           <div className="flex items-center space-x-3">
-            {licenseDays !== null && (
+            {licenseData !== null && licenseData.expirationDate && (
               <div 
                 className="hidden lg:flex items-center text-[10px] bg-slate-900 border border-slate-700 text-slate-300 px-2 py-1.5 rounded-lg" 
-                title={`El sistema tiene una validez de ${licenseDays} días restantes.`}
+                title={`El sistema tiene una validez de ${licenseData.daysRemaining} días restantes.`}
               >
-                <ShieldAlert className={`w-3.5 h-3.5 mr-1.5 ${licenseDays < 30 ? 'text-rose-500' : 'text-emerald-500'}`} />
-                <span>Licencia: <strong className={licenseDays < 30 ? 'text-rose-400' : 'text-white'}>{licenseDays} días</strong></span>
+                <ShieldAlert className={`w-3.5 h-3.5 mr-1.5 ${licenseData.daysRemaining < 30 ? 'text-rose-500' : 'text-emerald-500'}`} />
+                <span className="flex flex-col leading-tight justify-center">
+                  <span>Licencia: <strong className={licenseData.daysRemaining < 30 ? 'text-rose-400' : 'text-white'}>{licenseData.expirationDate}</strong></span>
+                  <span className="text-[8.5px] text-brand-400 font-semibold opacity-90 mt-[1px]">Restan {licenseData.daysRemaining} días</span>
+                </span>
               </div>
             )}
 
