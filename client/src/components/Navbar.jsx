@@ -1,6 +1,7 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import api from '../services/api';
 import { 
   ShoppingBag, 
   ShoppingCart, 
@@ -14,7 +15,8 @@ import {
   Store,
   Menu,
   X,
-  HelpCircle
+  HelpCircle,
+  ShieldAlert
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -22,6 +24,15 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [licenseDays, setLicenseDays] = useState(null);
+
+  useEffect(() => {
+    if (user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN')) {
+      api.get('/auth/license').then(res => {
+        setLicenseDays(res.data.daysRemaining);
+      }).catch(err => console.error('Error fetching license:', err));
+    }
+  }, [user]);
 
   const navItems = [
     { label: 'Punto de Venta', path: '/app/sales', icon: ShoppingCart, roles: ['ADMIN', 'SELLER', 'MANAGER', 'SUPERADMIN'] },
@@ -84,6 +95,16 @@ export default function Navbar() {
 
           {/* User badge & Actions */}
           <div className="flex items-center space-x-3">
+            {licenseDays !== null && (
+              <div 
+                className="hidden lg:flex items-center text-[10px] bg-slate-900 border border-slate-700 text-slate-300 px-2 py-1.5 rounded-lg" 
+                title={`El sistema tiene una validez de ${licenseDays} días restantes.`}
+              >
+                <ShieldAlert className={`w-3.5 h-3.5 mr-1.5 ${licenseDays < 30 ? 'text-rose-500' : 'text-emerald-500'}`} />
+                <span>Licencia: <strong className={licenseDays < 30 ? 'text-rose-400' : 'text-white'}>{licenseDays} días</strong></span>
+              </div>
+            )}
+
             <Link 
               to="/catalogo" 
               target="_blank" 

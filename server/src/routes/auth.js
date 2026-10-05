@@ -97,6 +97,30 @@ router.post('/change-password', authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/auth/license (ADMIN / SUPERADMIN)
+router.get('/license', authenticateToken, requireRole('ADMIN', 'SUPERADMIN'), async (req, res) => {
+  try {
+    const licenseRes = await client.execute({
+      sql: 'SELECT value FROM system_settings WHERE key = ?',
+      args: ['license_expiration']
+    });
+
+    if (licenseRes.rows.length === 0) {
+      return res.json({ daysRemaining: 0 });
+    }
+
+    const expDate = new Date(licenseRes.rows[0].value);
+    const now = new Date();
+    const diffTime = expDate - now;
+    const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return res.json({ daysRemaining: daysRemaining > 0 ? daysRemaining : 0 });
+  } catch (err) {
+    console.error('Error fetching license:', err);
+    return res.status(500).json({ error: 'Error al obtener licencia.' });
+  }
+});
+
 // GET /api/auth/users (ADMIN / SUPERADMIN)
 router.get('/users', authenticateToken, requireRole('ADMIN', 'SUPERADMIN'), async (req, res) => {
   try {
