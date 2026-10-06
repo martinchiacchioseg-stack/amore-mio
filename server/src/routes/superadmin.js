@@ -148,15 +148,16 @@ router.post('/diagnostics/run', authenticateToken, requireRole('SUPERADMIN'), as
 // POST /api/superadmin/license/extend
 router.post('/license/extend', authenticateToken, requireRole('SUPERADMIN'), async (req, res) => {
   try {
-    const { days } = req.body;
+    const { days, override } = req.body;
     if (!days || isNaN(days)) return res.status(400).json({ error: 'Días inválidos.' });
 
     const licenseRes = await client.execute({ sql: 'SELECT value FROM system_settings WHERE key = ?', args: ['license_expiration'] });
     let baseDate = new Date();
-    if (licenseRes.rows.length > 0 && new Date(licenseRes.rows[0].value) > new Date()) {
+    if (!override && licenseRes.rows.length > 0 && new Date(licenseRes.rows[0].value) > new Date()) {
       baseDate = new Date(licenseRes.rows[0].value);
     }
     
+    // If we're overriding, or if baseDate was today, we just add the days
     baseDate.setDate(baseDate.getDate() + Number(days));
     
     await client.execute({

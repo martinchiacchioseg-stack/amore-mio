@@ -189,24 +189,44 @@ export default function SuperAdminModal({ onClose }) {
                 <h4 className="text-xs font-bold text-slate-300">Licencia del Sistema</h4>
                 <p className="text-[10px] text-slate-400">Vence: {healthData?.producer?.licenseExpiration ? new Date(healthData.producer.licenseExpiration).toLocaleDateString('es-AR') : 'Indefinida'}</p>
               </div>
-              <button 
-                onClick={async () => {
-                  const days = prompt('¿Cuántos días querés extender la licencia?');
-                  if (days && !isNaN(days)) {
-                    try {
-                      await api.post('/superadmin/license/extend', { days: Number(days) }, { headers: { Authorization: `Bearer ${tempToken}` } });
-                      alert(`Licencia extendida por ${days} días.`);
-                      const hr = await api.get('/superadmin/health', { headers: { Authorization: `Bearer ${tempToken}` } });
-                      setHealthData(hr.data);
-                    } catch(e) {
-                      alert('Error al extender licencia.');
+              <div className="flex space-x-2">
+                <button 
+                  onClick={async () => {
+                    const days = prompt('¿Cuántos días querés fijar exactamente desde HOY? (Sobreescribe la fecha actual)');
+                    if (days && !isNaN(days)) {
+                      try {
+                        await api.post('/superadmin/license/extend', { days: Number(days), override: true }, { headers: { Authorization: `Bearer ${tempToken}` } });
+                        alert(`Licencia fijada en ${days} días desde hoy.`);
+                        const hr = await api.get('/superadmin/health', { headers: { Authorization: `Bearer ${tempToken}` } });
+                        setHealthData(hr.data);
+                      } catch(e) {
+                        alert('Error al fijar licencia.');
+                      }
                     }
-                  }
-                }}
-                className="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white text-[10px] font-bold rounded-lg transition"
-              >
-                + Extender
-              </button>
+                  }}
+                  className="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-bold rounded-lg transition"
+                >
+                  Fijar Días
+                </button>
+                <button 
+                  onClick={async () => {
+                    const days = prompt('¿Cuántos días extras querés sumar a la fecha de vencimiento actual?');
+                    if (days && !isNaN(days)) {
+                      try {
+                        await api.post('/superadmin/license/extend', { days: Number(days), override: false }, { headers: { Authorization: `Bearer ${tempToken}` } });
+                        alert(`Licencia extendida por ${days} días.`);
+                        const hr = await api.get('/superadmin/health', { headers: { Authorization: `Bearer ${tempToken}` } });
+                        setHealthData(hr.data);
+                      } catch(e) {
+                        alert('Error al extender licencia.');
+                      }
+                    }
+                  }}
+                  className="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white text-[10px] font-bold rounded-lg transition"
+                >
+                  + Extender
+                </button>
+              </div>
             </div>
             
             <div className="pt-2 border-t border-slate-700/60 mt-4">
