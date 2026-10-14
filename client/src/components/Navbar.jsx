@@ -16,7 +16,9 @@ import {
   Menu,
   X,
   HelpCircle,
-  ShieldAlert
+  ShieldAlert,
+  MessageCircle,
+  ExternalLink
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -47,6 +49,13 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleShareWhatsApp = () => {
+    const catalogUrl = typeof window !== 'undefined' ? `${window.location.origin}/catalogo` : 'https://amore-mio-lake.vercel.app/catalogo';
+    const text = `¡Hola! Te comparto nuestro catálogo online de Amore Mío para que veas todas nuestras prendas disponibles:\n${catalogUrl}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   return (
@@ -111,18 +120,18 @@ export default function Navbar() {
             <Link 
               to="/catalogo" 
               target="_blank" 
-              className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white rounded-lg transition hidden sm:inline-flex"
+              className="inline-flex items-center px-2 sm:px-2.5 py-1.5 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 hover:text-white rounded-lg transition border border-slate-700/60"
               title="Ver Catálogo Online Público"
             >
-              <Store className="w-3.5 h-3.5 mr-1 text-slate-400" />
-              Catálogo
+              <Store className="w-3.5 h-3.5 sm:mr-1 text-brand-400" />
+              <span className="hidden sm:inline">Catálogo</span>
             </Link>
             
             <a 
               href="/assets/Manual_Amore_Mio.pdf" 
               target="_blank" 
               rel="noreferrer"
-              className="inline-flex items-center px-2.5 py-1.5 text-xs font-bold text-brand-300 bg-brand-900/30 hover:bg-brand-900/60 border border-brand-700/50 rounded-lg transition"
+              className="inline-flex items-center px-2 sm:px-2.5 py-1.5 text-xs font-bold text-brand-300 bg-brand-900/30 hover:bg-brand-900/60 border border-brand-700/50 rounded-lg transition hidden xs:inline-flex"
               title="Manual de Usuario PDF"
             >
               <HelpCircle className="w-3.5 h-3.5 sm:mr-1 text-brand-400" />
@@ -195,6 +204,49 @@ export default function Navbar() {
                   </Link>
                 );
               })}
+
+            {/* Acceso Rápido al Catálogo y Compartir por WhatsApp en Celulares */}
+            <div className="pt-3 mt-3 border-t border-slate-100 space-y-2">
+              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider px-2 block">
+                Catálogo Web Online
+              </span>
+              
+              <a
+                href="/catalogo"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between px-3 py-2.5 text-sm font-bold rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition shadow-sm"
+              >
+                <span className="flex items-center">
+                  <Store className="w-4 h-4 mr-2.5 text-brand-400" />
+                  Ver Catálogo Web
+                </span>
+                <ExternalLink className="w-4 h-4 text-slate-400" />
+              </a>
+
+              <button
+                onClick={() => {
+                  handleShareWhatsApp();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-center px-3 py-2.5 text-sm font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-sm"
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Compartir por WhatsApp
+              </button>
+
+              <a
+                href="/assets/Manual_Amore_Mio.pdf"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center px-3 py-2 text-xs font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-xl transition"
+              >
+                <HelpCircle className="w-4 h-4 mr-2 text-brand-600" />
+                Manual de Usuario PDF
+              </a>
+            </div>
           </div>
         </div>
       )}

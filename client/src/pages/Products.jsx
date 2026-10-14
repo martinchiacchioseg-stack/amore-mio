@@ -14,7 +14,13 @@ import {
   Upload, 
   Calculator, 
   CheckCircle2, 
-  X 
+  X,
+  Store,
+  ExternalLink,
+  MessageCircle,
+  Copy,
+  Check,
+  Share2
 } from 'lucide-react';
 
 export default function Products() {
@@ -52,6 +58,24 @@ export default function Products() {
   });
   const [imageFile, setImageFile] = useState(null);
   const [error, setError] = useState('');
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const getCatalogUrl = () => {
+    return typeof window !== 'undefined' ? `${window.location.origin}/catalogo` : 'https://amore-mio-lake.vercel.app/catalogo';
+  };
+
+  const getWhatsAppShareUrl = () => {
+    const catalogUrl = getCatalogUrl();
+    const text = `¡Hola! Te comparto nuestro catálogo online de Amore Mío para que veas todas nuestras prendas disponibles:\n${catalogUrl}`;
+    return `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  };
+
+  const handleCopyLink = () => {
+    const catalogUrl = getCatalogUrl();
+    navigator.clipboard.writeText(catalogUrl);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
 
   useEffect(() => {
     loadProducts();
@@ -271,6 +295,73 @@ export default function Products() {
         )}
       </div>
 
+      {/* Banner de Acceso y Compartir Catálogo Web por WhatsApp (Optimizado Móvil y Escritorio) */}
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-brand-950 text-white p-4 sm:p-5 rounded-2xl border border-brand-800/40 shadow-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center space-x-3.5">
+            <div className="p-3 bg-brand-500/20 border border-brand-500/40 rounded-xl text-brand-300 flex-shrink-0">
+              <Store className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-sm sm:text-base font-bold text-white tracking-wide">
+                  Catálogo Web en Vivo
+                </h2>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+                  SINCRONIZADO AL STOCK
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 mt-0.5">
+                Tus clientes ven en tiempo real lo publicado en stock. Accedé o compartí el enlace por WhatsApp.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-2 sm:pt-0 border-t border-slate-800 sm:border-t-0">
+            <a
+              href="/catalogo"
+              target="_blank"
+              rel="noreferrer"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-white rounded-xl text-xs font-bold transition border border-slate-700 shadow-sm"
+              title="Abrir el catálogo online público"
+            >
+              <ExternalLink className="w-4 h-4 mr-1.5 text-brand-400" />
+              Ver Catálogo
+            </a>
+
+            <a
+              href={getWhatsAppShareUrl()}
+              target="_blank"
+              rel="noreferrer"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-emerald-950/40"
+              title="Compartir enlace del catálogo por WhatsApp"
+            >
+              <MessageCircle className="w-4 h-4 mr-1.5" />
+              Compartir por WhatsApp
+            </a>
+
+            <button
+              onClick={handleCopyLink}
+              className="inline-flex items-center justify-center px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-medium transition border border-slate-700"
+              title="Copiar enlace del catálogo"
+            >
+              {copiedLink ? (
+                <>
+                  <Check className="w-4 h-4 mr-1 text-emerald-400" />
+                  <span className="text-[11px] text-emerald-300 font-bold">¡Copiado!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4 sm:mr-1" />
+                  <span className="hidden sm:inline text-[11px]">Copiar Link</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Filter Bar */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
@@ -398,6 +489,17 @@ export default function Products() {
                         </button>
                       </td>
                       <td className="p-4 text-right space-x-1">
+                        {prod.is_published === 1 && (
+                          <a
+                            href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`¡Hola! Te comparto esta prenda de Amore Mío:\n${prod.name} (${prod.code}) - $${Number(prod.sale_price).toLocaleString('es-AR')}\n${getCatalogUrl()}`)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition inline-flex items-center"
+                            title="Compartir esta prenda por WhatsApp"
+                          >
+                            <MessageCircle className="w-4 h-4" />
+                          </a>
+                        )}
                         {user?.role !== 'SELLER' && (
                           <>
                             <button
