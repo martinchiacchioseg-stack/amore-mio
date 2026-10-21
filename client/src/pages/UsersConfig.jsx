@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
-import { Settings, UserPlus, Shield, Percent, DollarSign, Edit3, Key, CheckCircle2, MessageCircle, Phone, Save, ExternalLink, Instagram } from 'lucide-react';
+import { Settings, UserPlus, Shield, Percent, DollarSign, Edit3, Key, CheckCircle2, MessageCircle, Phone, Save, ExternalLink, Instagram, Download, Share2, Award, ShieldCheck, Calendar } from 'lucide-react';
 
 export default function UsersConfig() {
   const { user: currentUser } = useContext(AuthContext);
@@ -15,6 +15,10 @@ export default function UsersConfig() {
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsSuccess, setSettingsSuccess] = useState(false);
 
+  // License & Subscription State (RolΦ Studio)
+  const [licenseData, setLicenseData] = useState(null);
+  const [licenseLoading, setLicenseLoading] = useState(true);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -27,7 +31,43 @@ export default function UsersConfig() {
   useEffect(() => {
     loadUsers();
     loadSettings();
+    loadLicense();
   }, []);
+
+  const loadLicense = async () => {
+    setLicenseLoading(true);
+    try {
+      const res = await api.get('/auth/license');
+      setLicenseData(res.data);
+    } catch (err) {
+      console.error('Error cargando licencia:', err);
+    } finally {
+      setLicenseLoading(false);
+    }
+  };
+
+  const handleDownloadLicensePDF = () => {
+    const token = localStorage.getItem('token');
+    window.open(`/api/auth/license/pdf?token=${token}`, '_blank');
+  };
+
+  const handleShareLicenseWhatsApp = () => {
+    if (!licenseData) return;
+    const text = `🛡️ *COMPROBANTE OFICIAL DE SUSCRIPCIÓN & LICENCIA*
+*RolΦ Studio - Supervisión Técnica Independiente*
+-------------------------------------------
+👤 *Cliente:* Amore Mío Lencería
+📋 *Plan Otorgado:* ${licenseData.planName || 'Plan Comercial'}
+⏳ *Días Otorgados:* ${licenseData.daysGranted || 30} días
+📅 *Fecha de Emisión:* ${licenseData.grantedAt || 'Hoy'}
+🗓️ *Fecha de Vencimiento:* ${licenseData.expirationDate || 'Vigente'}
+⏱️ *Días Restantes:* ${licenseData.daysRemaining || 0} días
+🔑 *Certificado Nº:* ${licenseData.licenseCode || 'ROLPHI-LIC'}
+-------------------------------------------
+✅ Tu sistema está activo y funcionando normalmente.
+📄 Podés ver tu tarjeta verde oficial y descargar tu comprobante desde la Configuración de Administrador en el programa.`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+  };
 
   const loadSettings = async () => {
     try {
@@ -132,6 +172,145 @@ export default function UsersConfig() {
           <UserPlus className="w-4 h-4 mr-1.5" />
           Nuevo Vendedor / Encargado
         </button>
+      </div>
+
+      {/* TARJETA VERDE OFICIAL DE SUSCRIPCIÓN & LICENCIA ROLPHI */}
+      <div className="bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-950 text-white rounded-3xl p-6 sm:p-7 shadow-xl border-2 border-emerald-500/40 relative overflow-hidden">
+        {/* Glow Accents */}
+        <div className="absolute -top-20 -right-20 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-teal-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        {/* Header de la Tarjeta */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-emerald-700/50 relative z-10">
+          <div className="flex items-center space-x-3.5">
+            <div className="rounded-xl overflow-hidden shadow-md border-2 border-emerald-400/40 bg-black/40 flex-shrink-0">
+              <img 
+                src="/assets/rolphi.jpg" 
+                alt="RolΦ Studio" 
+                className="h-12 w-auto object-contain"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-[10px] font-mono tracking-widest text-emerald-300 uppercase font-bold">
+                  ROLΦ STUDIO • SUPERVISIÓN TÉCNICA INDEPENDIENTE
+                </span>
+              </div>
+              <h2 className="text-lg sm:text-xl font-extrabold text-white leading-tight">
+                Tarjeta Oficial de Licencia & Suscripción
+              </h2>
+              <p className="text-xs text-emerald-200">
+                Software Amore Mío • Garantía técnica y soporte continuo en la nube
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 self-start sm:self-auto">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 shadow-sm backdrop-blur-sm">
+              <ShieldCheck className="w-4 h-4 mr-1.5 text-emerald-400" />
+              {licenseData?.status === 'ACTIVA' ? 'LICENCIA ACTIVA Y VIGENTE' : 'VERIFICACIÓN ACTIVA'}
+            </span>
+          </div>
+        </div>
+
+        {/* Contador Prominente y Grilla de Datos */}
+        <div className="my-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10">
+          {/* Contador de días en tiempo real */}
+          <div className="lg:col-span-5 bg-black/25 backdrop-blur-sm border border-emerald-500/30 rounded-2xl p-5 text-center flex flex-col justify-center items-center shadow-inner">
+            <span className="text-[11px] font-bold text-emerald-300 uppercase tracking-widest block mb-1">
+              Contador de Días de Licencia
+            </span>
+            <div className="flex items-baseline justify-center space-x-2 my-1">
+              <span className="text-5xl sm:text-6xl font-black text-emerald-400 tracking-tight">
+                {licenseData ? licenseData.daysRemaining : '--'}
+              </span>
+              <span className="text-lg font-bold text-emerald-200">
+                días restantes
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 mt-1 max-w-xs">
+              {licenseData && licenseData.daysRemaining > 0
+                ? `Vencimiento programado para el ${licenseData.expirationDate}`
+                : 'Licencia activa y supervisada por RolΦ Studio'}
+            </p>
+          </div>
+
+          {/* Ficha de Detalles del Plan Otorgado */}
+          <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="bg-emerald-950/60 p-3 rounded-2xl border border-emerald-700/40">
+              <span className="text-[10px] uppercase font-bold text-emerald-300 block mb-0.5">Plan de Licencia</span>
+              <span className="text-xs font-extrabold text-white truncate block">
+                {licenseData?.planName || 'Plan Comercial RolΦ'}
+              </span>
+            </div>
+
+            <div className="bg-emerald-950/60 p-3 rounded-2xl border border-emerald-700/40">
+              <span className="text-[10px] uppercase font-bold text-emerald-300 block mb-0.5">Días Otorgados</span>
+              <span className="text-xs font-extrabold text-emerald-300 block">
+                {licenseData?.daysGranted || 30} días
+              </span>
+            </div>
+
+            <div className="bg-emerald-950/60 p-3 rounded-2xl border border-emerald-700/40">
+              <span className="text-[10px] uppercase font-bold text-emerald-300 block mb-0.5">Fecha de Emisión</span>
+              <span className="text-xs font-semibold text-white block">
+                {licenseData?.grantedAt || 'Hoy'}
+              </span>
+            </div>
+
+            <div className="bg-emerald-950/60 p-3 rounded-2xl border border-emerald-700/40">
+              <span className="text-[10px] uppercase font-bold text-emerald-300 block mb-0.5">Fecha de Vencimiento</span>
+              <span className="text-xs font-extrabold text-emerald-400 block">
+                {licenseData?.expirationDate || 'Vigente'}
+              </span>
+            </div>
+
+            <div className="bg-emerald-950/60 p-3 rounded-2xl border border-emerald-700/40">
+              <span className="text-[10px] uppercase font-bold text-emerald-300 block mb-0.5">Certificado Serial</span>
+              <span className="text-[11px] font-mono font-bold text-emerald-300 truncate block">
+                {licenseData?.licenseCode || 'ROLPHI-LIC-2026'}
+              </span>
+            </div>
+
+            <div className="bg-emerald-950/60 p-3 rounded-2xl border border-emerald-700/40">
+              <span className="text-[10px] uppercase font-bold text-emerald-300 block mb-0.5">Supervisión Técnica</span>
+              <span className="text-[11px] font-semibold text-slate-200 truncate block">
+                RolΦ Studio
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Barra Inferior de Acciones */}
+        <div className="pt-4 border-t border-emerald-700/50 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 relative z-10">
+          <div className="text-xs text-emerald-200 flex items-center">
+            <Award className="w-4 h-4 mr-2 text-emerald-400 flex-shrink-0" />
+            <span>Comprobante digital oficial de uso del software y soporte activo.</span>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleDownloadLicensePDF}
+              className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-bold bg-white text-emerald-950 hover:bg-emerald-50 transition shadow-lg hover:scale-105"
+              title="Descargar Comprobante Oficial de Licencia en PDF"
+            >
+              <Download className="w-4 h-4 mr-1.5 text-emerald-800" />
+              <span>Descargar Tarjeta PDF</span>
+            </button>
+
+            {currentUser?.role === 'SUPERADMIN' && (
+              <button
+                onClick={handleShareLicenseWhatsApp}
+                className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-lg border border-emerald-400/30 hover:scale-105"
+                title="Compartir comprobante de licencia por WhatsApp"
+              >
+                <MessageCircle className="w-4 h-4 mr-1.5" />
+                <span>Enviar por WhatsApp</span>
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Configuración General: WhatsApp del Catálogo Web */}

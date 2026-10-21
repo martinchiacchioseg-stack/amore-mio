@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { client } from '../config/db.js';
 import { authenticateToken, requireRole, JWT_SECRET } from '../middleware/auth.js';
+import { generateLicenseCertificatePDF } from '../services/pdfService.js';
 
 const router = express.Router();
 
@@ -100,16 +101,33 @@ router.post('/change-password', authenticateToken, async (req, res) => {
 // GET /api/auth/license (ADMIN / SUPERADMIN)
 router.get('/license', authenticateToken, requireRole('ADMIN', 'SUPERADMIN'), async (req, res) => {
   try {
-    const licenseRes = await client.execute({
-      sql: 'SELECT value FROM system_settings WHERE key = ?',
-      args: ['license_expiration']
+    const settingsRes = await client.execute({
+      sql: `SELECT key, value FROM system_settings WHERE key IN (
+        'license_expiration', 
+        'license_plan', 
+        'license_days_granted', 
+        'license_granted_at', 
+        'license_code', 
+        'license_notes'
+      )`
     });
 
-    if (licenseRes.rows.length === 0) {
-      return res.json({ daysRemaining: 0, expirationDate: null });
+    const settings = {};
+    settingsRes.rows.forEach(r => { settings[r.key] = r.value; });
+
+    if (!settings.license_expiration) {
+      return res.json({ 
+        daysRemaining: 0, 
+        expirationDate: null,
+        planName: 'Sin Licencia Activa',
+        daysGranted: 0,
+        grantedAt: null,
+        licenseCode: 'ROLPHI-SIN-LIC',
+        status: 'VENCIDA'
+      });
     }
 
-    const expDate = new Date(licenseRes.rows[0].value);
+    const expDate = new Date(settings.license_expiration);
     const now = new Date();
     const diffTime = expDate.getTime() - now.getTime();
     const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -120,14 +138,89 @@ router.get('/license', authenticateToken, requireRole('ADMIN', 'SUPERADMIN'), as
       month: '2-digit',
       year: 'numeric'
     });
+
+    const grantedAtDate = settings.license_granted_at ? new Date(settings.license_granted_at) : null;
+    const formattedGrantedAt = grantedAtDate ? grantedAtDate.toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }) : formattedDate;
     
     return res.json({ 
       daysRemaining: daysRemaining > 0 ? daysRemaining : 0,
-      expirationDate: formattedDate
+      expirationDate: formattedDate,
+      expirationIso: expDate.toISOString(),
+      planName: settings.license_plan || 'Plan Comercial RolΦ Studio',
+      daysGranted: settings.license_days_granted ? Number(settings.license_days_granted) : 30,
+      grantedAt: formattedGrantedAt,
+      grantedAtIso: settings.license_granted_at || null,
+      licenseCode: settings.license_code || 'ROLPHI-LIC-2026',
+      notes: settings.license_notes || '',
+      producer: {
+        name: 'RolΦ Studio',
+        title: 'Supervisión Técnica & Desarrollo',
+        contact: 'martinchiacchio.seg@gmail.com',
+        whatsapp: '5493416123456',
+        verified: true
+      },
+      clientName: 'Amore Mío Lencería',
+      status: daysRemaining > 0 ? 'ACTIVA' : 'VENCIDA'
     });
   } catch (err) {
     console.error('Error fetching license:', err);
     return res.status(500).json({ error: 'Error al obtener licencia.' });
+  }
+});
+
+// GET /api/auth/license/pdf (ADMIN / SUPERADMIN)
+router.get('/license/pdf', authenticateToken, requireRole('ADMIN', 'SUPERADMIN'), async (req, res) => {
+  try {
+    const settingsRes = await client.execute({
+      sql: `SELECT key, value FROM system_settings WHERE key IN (
+        'license_expiration', 
+        'license_plan', 
+        'license_days_granted', 
+        'license_granted_at', 
+        'license_code', 
+        'license_notes'
+      )`
+    });
+
+    const settings = {};
+    settingsRes.rows.forEach(r => { settings[r.key] = r.value; });
+
+    const expDate = settings.license_expiration ? new Date(settings.license_expiration) : new Date();
+    const now = new Date();
+    const diffTime = expDate.getTime() - now.getTime();
+    const daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+
+    const formattedExpDate = expDate.toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+
+    const grantedAtDate = settings.license_granted_at ? new Date(settings.license_granted_at) : null;
+    const formattedGrantedAt = grantedAtDate ? grantedAtDate.toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }) : formattedExpDate;
+
+    const licenseData = {
+      daysRemaining,
+      expirationDate: formattedExpDate,
+      planName: settings.license_plan || 'Plan Comercial RolΦ Studio',
+      daysGranted: settings.license_days_granted ? Number(settings.license_days_granted) : 30,
+      grantedAt: formattedGrantedAt,
+      licenseCode: settings.license_code || 'ROLPHI-LIC-2026',
+      notes: settings.license_notes || ''
+    };
+
+    generateLicenseCertificatePDF(res, licenseData);
+  } catch (err) {
+    console.error('Error generating license PDF:', err);
+    return res.status(500).json({ error: 'Error al generar certificado de licencia.' });
   }
 });
 

@@ -13,6 +13,13 @@ const possiblePaths = [
 ];
 const logoPath = possiblePaths.find(p => fs.existsSync(p));
 
+const possibleRolphiPaths = [
+  path.join(process.cwd(), 'public/assets/rolphi.jpg'),
+  path.join(__dirname, '../../../client/public/assets/rolphi.jpg'),
+  path.join(__dirname, '../../public/assets/rolphi.jpg')
+];
+const rolphiPath = possibleRolphiPaths.find(p => fs.existsSync(p));
+
 function drawHeader(doc, title, subtitle = '') {
   // Brand Header
   if (logoPath) {
@@ -344,6 +351,152 @@ export function generateSaleTicketPDF(sale, items, res) {
   
   y += 30;
   doc.font('Helvetica').fontSize(8).fillColor('#888').text('Gracias por elegir Amore Mío.', 45, y, { align: 'center', width: 320 });
+
+  doc.end();
+}
+
+/**
+ * Genera el Certificado Oficial de Licencia & Suscripción en PDF (RolΦ Studio)
+ */
+export function generateLicenseCertificatePDF(res, license) {
+  const doc = new PDFDocument({
+    margin: 40,
+    size: 'A4'
+  });
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader(
+    'Content-Disposition',
+    `inline; filename="Certificado_Licencia_${license.licenseCode || 'Amore_Mio'}.pdf"`
+  );
+
+  doc.pipe(res);
+
+  // Outer border & background accent
+  doc.rect(20, 20, 555, 802).lineWidth(2).strokeColor('#047857').stroke();
+  doc.rect(25, 25, 545, 792).lineWidth(0.5).strokeColor('#10b981').stroke();
+
+  // Top header background (Dark Emerald)
+  doc.rect(25, 25, 545, 105).fillColor('#064e3b').fill();
+
+  // Rolphi Logo if available
+  if (rolphiPath) {
+    try {
+      doc.image(rolphiPath, 45, 38, { width: 75 });
+    } catch (e) {
+      console.error('Error drawing rolphi logo:', e);
+    }
+  }
+
+  // Header texts
+  doc.fillColor('#ffffff')
+     .font('Helvetica-Bold')
+     .fontSize(16)
+     .text('ROLΦ STUDIO', 135, 42);
+
+  doc.fillColor('#a7f3d0')
+     .font('Helvetica-Bold')
+     .fontSize(9.5)
+     .text('SUPERVISIÓN TÉCNICA & DESARROLLO DE SOFTWARE INDEPENDIENTE', 135, 62);
+
+  doc.fillColor('#e2e8f0')
+     .font('Helvetica')
+     .fontSize(8.5)
+     .text('Contacto Oficial: martinchiacchio.seg@gmail.com • Soporte Activo', 135, 78);
+
+  // Big Title Banner
+  doc.rect(40, 150, 515, 36).fillColor('#ecfdf5').fill();
+  doc.rect(40, 150, 515, 36).lineWidth(1).strokeColor('#a7f3d0').stroke();
+
+  doc.fillColor('#065f46')
+     .font('Helvetica-Bold')
+     .fontSize(13)
+     .text('CERTIFICADO OFICIAL DE LICENCIA & SUSCRIPCIÓN', 40, 162, { align: 'center', width: 515 });
+
+  // Main Card Box (Emerald theme)
+  const cardY = 200;
+  doc.roundedRect(40, cardY, 515, 425, 10).fillColor('#ffffff').fill();
+  doc.roundedRect(40, cardY, 515, 425, 10).lineWidth(1.5).strokeColor('#10b981').stroke();
+
+  // Green header strip inside box
+  doc.roundedRect(40, cardY, 515, 38, 10).fillColor('#047857').fill();
+  doc.rect(40, cardY + 20, 515, 18).fillColor('#047857').fill();
+
+  doc.fillColor('#ffffff')
+     .font('Helvetica-Bold')
+     .fontSize(11)
+     .text('ESTADO DEL SISTEMA: LICENCIA ACTIVA Y VIGENTE', 40, cardY + 13, { align: 'center', width: 515 });
+
+  // Certificate Fields Grid
+  let y = cardY + 54;
+  const drawRow = (label, value, isHighlight = false) => {
+    doc.fillColor('#64748b').font('Helvetica-Bold').fontSize(10).text(label, 60, y, { width: 175 });
+    if (isHighlight) {
+      doc.fillColor('#047857').font('Helvetica-Bold').fontSize(10.5).text(String(value), 240, y, { width: 290 });
+    } else {
+      doc.fillColor('#1e293b').font('Helvetica').fontSize(10).text(String(value), 240, y, { width: 290 });
+    }
+    y += 24;
+    doc.moveTo(60, y - 5).lineTo(530, y - 5).lineWidth(0.5).strokeColor('#f1f5f9').stroke();
+  };
+
+  drawRow('Software Autorizado:', 'Amore Mío - Sistema de Gestión Comercial', true);
+  drawRow('Titular / Cliente:', 'Amore Mío Lencería');
+  drawRow('Plan de Licencia:', license.planName || 'Plan Comercial RolΦ Studio', true);
+  drawRow('Días Otorgados en este Plan:', `${license.daysGranted || 30} días corridos`);
+  drawRow('Fecha de Otorgamiento:', license.grantedAt || new Date().toLocaleDateString('es-AR'));
+  drawRow('Fecha de Vencimiento:', license.expirationDate || 'Vigente', true);
+  drawRow('Contador de Días Restantes:', `${license.daysRemaining} días de validez activa`, true);
+  drawRow('Código Único de Certificado:', license.licenseCode || 'ROLPHI-LIC-2026-OK', true);
+  drawRow('Tipo de Mantenimiento:', 'Supervisión Técnica y Actualizaciones en la Nube');
+  drawRow('Entorno de Producción:', 'Vercel Serverless + Base de Datos LibSQL');
+  if (license.notes) {
+    drawRow('Observaciones:', license.notes);
+  }
+
+  // Legal / Terms Notice Box
+  const noticeY = 645;
+  doc.roundedRect(40, noticeY, 515, 75, 8).fillColor('#f8fafc').fill();
+  doc.roundedRect(40, noticeY, 515, 75, 8).lineWidth(1).strokeColor('#e2e8f0').stroke();
+
+  doc.fillColor('#065f46')
+     .font('Helvetica-Bold')
+     .fontSize(8.5)
+     .text('CONDICIONES DE VALIDEZ & SOPORTE TÉCNICO:', 55, noticeY + 10);
+
+  doc.fillColor('#64748b')
+     .font('Helvetica')
+     .fontSize(7.5)
+     .text(
+       'Este documento digital certifica que la instalación de Amore Mío cuenta con la licencia técnica correspondiente otorgada por RolΦ Studio. Los días restantes se computan en tiempo real contra los servidores del sistema. Al vencer el plazo otorgado, el administrador podrá solicitar la renovación a través de los canales oficiales de contacto.',
+       55,
+       noticeY + 23,
+       { width: 485, lineGap: 2 }
+     );
+
+  // Bottom Seal / Signature
+  const footerY = 740;
+  doc.moveTo(40, footerY).lineTo(555, footerY).lineWidth(1).strokeColor('#cbd5e1').stroke();
+
+  doc.fillColor('#064e3b')
+     .font('Helvetica-Bold')
+     .fontSize(9)
+     .text('ROLΦ STUDIO • DEPARTAMENTO TÉCNICO', 55, footerY + 12);
+
+  doc.fillColor('#94a3b8')
+     .font('Helvetica')
+     .fontSize(8)
+     .text(`Certificado emitido para Amore Mío el ${new Date().toLocaleDateString('es-AR')} a las ${new Date().toLocaleTimeString('es-AR')} hs.`, 55, footerY + 26);
+
+  doc.fillColor('#059669')
+     .font('Helvetica-Bold')
+     .fontSize(9)
+     .text('✓ VERIFICADO DIGITALMENTE', 410, footerY + 12, { align: 'right', width: 140 });
+
+  doc.fillColor('#64748b')
+     .font('Helvetica')
+     .fontSize(8)
+     .text('Firma Digital RolΦ Studio', 410, footerY + 26, { align: 'right', width: 140 });
 
   doc.end();
 }

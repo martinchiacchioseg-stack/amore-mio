@@ -66,13 +66,17 @@ Módulo para administrar todos los fabricantes y talleres de confección.
 
 ---
 
-## 👥 Usuarios, WhatsApp y Comisiones
-**Acceso:** Administradores
+## 👥 Configuración, Licencia Oficial & Personal
+**Acceso:** Administradores y SuperAdministrador
 
-Desde este menú podés dar de alta a tus vendedoras y configurar cómo cobran.
+Módulo integral de administración del sistema y suscripción de software.
 
-- **Tipos de Comisión:** Al crear un Vendedor, podés asignarle una comisión **FIJA** (ej. $1000 por cada venta) o por **PORCENTAJE** (ej. 10% del total vendido). 
-- El sistema se encarga de sumar las comisiones por cada venta cerrada sin que tengas que usar la calculadora.
+- **Tarjeta Verde Oficial de Suscripción RolΦ Studio:** En la parte superior de la configuración, el administrador tiene su tarjeta verde oficial de garantía técnica con el logo de RolΦ Studio, nombre del plan contratado (ej. Plan Trimestral, Semestral, Anual), fecha de emisión, fecha de vencimiento y certificado serial único.
+- **Contador de Días en Vivo:** Muestra permanentemente la cantidad exacta de días restantes de validez del sistema en tiempo real.
+- **Descargar Tarjeta en PDF:** Tanto el Administrador como el Superadministrador pueden descargar el Certificado Oficial de Licencia en formato PDF de alta resolución con sello digital.
+- **Envío por WhatsApp:** El Superadministrador puede compartir el comprobante oficial de renovación por WhatsApp en un solo clic.
+- **WhatsApp Oficial del Catálogo Web:** Número configurable donde los clientes envían sus consultas de prendas y talles desde la web.
+- **Comisiones de Personal:** Alta de vendedoras con comisión FIJA o por PORCENTAJE calculadas automáticamente.
 
 ---
 

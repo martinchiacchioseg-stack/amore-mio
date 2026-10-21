@@ -1,6 +1,7 @@
 import express from 'express';
 import { client } from '../config/db.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
+import { generateLicenseCertificatePDF } from '../services/pdfService.js';
 
 const router = express.Router();
 
@@ -12,16 +13,44 @@ router.get('/health', authenticateToken, requireRole('SUPERADMIN'), async (req, 
     const salesCount = (await client.execute('SELECT COUNT(*) as count FROM sales')).rows[0].count;
     const customersCount = (await client.execute('SELECT COUNT(*) as count FROM customers')).rows[0].count;
     const movementsCount = (await client.execute('SELECT COUNT(*) as count FROM cash_movements')).rows[0].count;
-    const licenseRes = await client.execute({ sql: 'SELECT value FROM system_settings WHERE key = ?', args: ['license_expiration'] });
-    const licenseExpiration = licenseRes.rows.length > 0 ? licenseRes.rows[0].value : null;
+    
+    const settingsRes = await client.execute({
+      sql: `SELECT key, value FROM system_settings WHERE key IN (
+        'license_expiration', 
+        'license_plan', 
+        'license_days_granted', 
+        'license_granted_at', 
+        'license_code', 
+        'license_notes'
+      )`
+    });
+    const settings = {};
+    settingsRes.rows.forEach(r => { settings[r.key] = r.value; });
+
+    const licenseExpiration = settings.license_expiration || null;
+    let daysRemaining = 0;
+    let formattedExpDate = null;
+    if (licenseExpiration) {
+      const expDate = new Date(licenseExpiration);
+      const diffTime = expDate.getTime() - new Date().getTime();
+      daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+      formattedExpDate = expDate.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
 
     return res.json({
       producer: {
         studio: 'RolΦ Studio',
         developer: 'Soporte Técnico RolΦ',
-        contact: 'soporte@rolphi.com',
+        contact: 'martinchiacchio.seg@gmail.com',
         version: '1.0.0-PROD',
-        licenseExpiration
+        licenseExpiration,
+        daysRemaining,
+        expirationDate: formattedExpDate,
+        planName: settings.license_plan || 'Plan Comercial RolΦ Studio',
+        daysGranted: settings.license_days_granted ? Number(settings.license_days_granted) : 30,
+        grantedAt: settings.license_granted_at ? new Date(settings.license_granted_at).toLocaleDateString('es-AR') : null,
+        licenseCode: settings.license_code || 'ROLPHI-LIC-2026',
+        notes: settings.license_notes || ''
       },
       system: {
         nodeVersion: process.version,
@@ -148,7 +177,7 @@ router.post('/diagnostics/run', authenticateToken, requireRole('SUPERADMIN'), as
 // POST /api/superadmin/license/extend
 router.post('/license/extend', authenticateToken, requireRole('SUPERADMIN'), async (req, res) => {
   try {
-    const { days, override } = req.body;
+    const { days, override, planName, notes } = req.body;
     if (!days || isNaN(days)) return res.status(400).json({ error: 'Días inválidos.' });
 
     const licenseRes = await client.execute({ sql: 'SELECT value FROM system_settings WHERE key = ?', args: ['license_expiration'] });
@@ -160,14 +189,97 @@ router.post('/license/extend', authenticateToken, requireRole('SUPERADMIN'), asy
     // If we're overriding, or if baseDate was today, we just add the days
     baseDate.setDate(baseDate.getDate() + Number(days));
     
-    await client.execute({
-      sql: 'UPDATE system_settings SET value = ? WHERE key = ?',
-      args: [baseDate.toISOString(), 'license_expiration']
+    const nowIso = new Date().toISOString();
+    const finalPlanName = planName || (Number(days) === 30 ? 'Plan Mensual (30 Días)' : Number(days) === 90 ? 'Plan Trimestral (90 Días)' : Number(days) === 180 ? 'Plan Semestral (180 Días)' : Number(days) === 365 ? 'Plan Anual (365 Días)' : `Plan Especial (${days} Días)`);
+    const finalCode = `ROLPHI-AM-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const upsertSetting = async (key, val) => {
+      await client.execute({
+        sql: `INSERT INTO system_settings (key, value) VALUES (?, ?) 
+              ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+        args: [key, String(val)]
+      });
+    };
+
+    await upsertSetting('license_expiration', baseDate.toISOString());
+    await upsertSetting('license_plan', finalPlanName);
+    await upsertSetting('license_days_granted', String(days));
+    await upsertSetting('license_granted_at', nowIso);
+    await upsertSetting('license_code', finalCode);
+    if (notes !== undefined) {
+      await upsertSetting('license_notes', notes);
+    }
+
+    const diffTime = baseDate.getTime() - new Date().getTime();
+    const daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+    const formattedExpDate = baseDate.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const formattedGrantedAt = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+    return res.json({ 
+      success: true, 
+      newExpiration: baseDate.toISOString(),
+      daysRemaining,
+      expirationDate: formattedExpDate,
+      planName: finalPlanName,
+      daysGranted: Number(days),
+      grantedAt: formattedGrantedAt,
+      licenseCode: finalCode,
+      notes: notes || ''
+    });
+  } catch (err) {
+    console.error('Error al extender licencia:', err);
+    return res.status(500).json({ error: 'Error al extender licencia.' });
+  }
+});
+
+// GET /api/superadmin/license/pdf
+router.get('/license/pdf', authenticateToken, requireRole('SUPERADMIN'), async (req, res) => {
+  try {
+    const settingsRes = await client.execute({
+      sql: `SELECT key, value FROM system_settings WHERE key IN (
+        'license_expiration', 
+        'license_plan', 
+        'license_days_granted', 
+        'license_granted_at', 
+        'license_code', 
+        'license_notes'
+      )`
     });
 
-    return res.json({ success: true, newExpiration: baseDate.toISOString() });
+    const settings = {};
+    settingsRes.rows.forEach(r => { settings[r.key] = r.value; });
+
+    const expDate = settings.license_expiration ? new Date(settings.license_expiration) : new Date();
+    const diffTime = expDate.getTime() - new Date().getTime();
+    const daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+
+    const formattedExpDate = expDate.toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+
+    const grantedAtDate = settings.license_granted_at ? new Date(settings.license_granted_at) : null;
+    const formattedGrantedAt = grantedAtDate ? grantedAtDate.toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }) : formattedExpDate;
+
+    const licenseData = {
+      daysRemaining,
+      expirationDate: formattedExpDate,
+      planName: settings.license_plan || 'Plan Comercial RolΦ Studio',
+      daysGranted: settings.license_days_granted ? Number(settings.license_days_granted) : 30,
+      grantedAt: formattedGrantedAt,
+      licenseCode: settings.license_code || 'ROLPHI-LIC-2026',
+      notes: settings.license_notes || ''
+    };
+
+    generateLicenseCertificatePDF(res, licenseData);
   } catch (err) {
-    return res.status(500).json({ error: 'Error al extender licencia.' });
+    console.error('Error generating superadmin license PDF:', err);
+    return res.status(500).json({ error: 'Error al generar certificado de licencia.' });
   }
 });
 
