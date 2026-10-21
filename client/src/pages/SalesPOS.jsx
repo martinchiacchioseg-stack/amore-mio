@@ -39,7 +39,7 @@ export default function SalesPOS() {
   
   // Inline Customer Creation
   const [showCustomerModal, setShowCustomerModal] = useState(false);
-  const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', email: '', document_number: '' });
+  const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', email: '', size: '', document_number: '' });
   const [lastCompletedSale, setLastCompletedSale] = useState(null);
 
   useEffect(() => {
@@ -170,7 +170,9 @@ export default function SalesPOS() {
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
-    p.code.toLowerCase().includes(searchProduct.toLowerCase())
+    p.code.toLowerCase().includes(searchProduct.toLowerCase()) ||
+    (p.sizes && p.sizes.toLowerCase().includes(searchProduct.toLowerCase())) ||
+    (p.description && p.description.toLowerCase().includes(searchProduct.toLowerCase()))
   );
 
   const handleSaveCustomer = async (e) => {
@@ -289,17 +291,33 @@ export default function SalesPOS() {
                 <option value="">-- Consumidor Final (Venta Anónima) --</option>
                 {customers.map(c => (
                   <option key={c.id} value={c.id}>
-                    {c.name} {c.credit_balance > 0 ? `(Deuda Cta.Cte: $${c.credit_balance.toLocaleString('es-AR')})` : ''}
+                    {c.name} {c.size ? `[Talle: ${c.size}]` : ''} {c.credit_balance > 0 ? `(Deuda Cta.Cte: $${c.credit_balance.toLocaleString('es-AR')})` : ''}
                   </option>
                 ))}
               </select>
+
+              {selectedCustomerId && (() => {
+                const c = customers.find(item => item.id.toString() === selectedCustomerId.toString());
+                if (!c) return null;
+                return (
+                  <div className="mt-2 flex items-center justify-between p-2 bg-white rounded-xl border border-brand-200 text-xs">
+                    <span className="text-slate-600 flex items-center">
+                      <span className="mr-1">Talle del cliente:</span>
+                      <strong className="text-brand-700 bg-brand-50 px-2 py-0.5 rounded border border-brand-200">
+                        {c.size || 'Sin talle registrado'}
+                      </strong>
+                    </span>
+                    {c.phone && <span className="text-slate-400 font-mono text-[11px]">{c.phone}</span>}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Product Search Add */}
             <div className="relative">
               <label className="block text-xs font-bold text-brand-900 mb-1.5 flex items-center">
                 <Search className="w-4 h-4 mr-1 text-brand-600" />
-                Buscar o Seleccionar Producto
+                Buscar o Seleccionar Producto (Nombre, Código o Talle)
               </label>
               <div 
                 className="relative"
@@ -311,7 +329,7 @@ export default function SalesPOS() {
               >
                 <input
                   type="text"
-                  placeholder="Busca por nombre o hacé clic para ver todos..."
+                  placeholder="Busca por nombre, código o talle (ej: 95, XL)..."
                   value={searchProduct}
                   onFocus={() => setShowDropdown(true)}
                   onChange={(e) => {
@@ -341,8 +359,15 @@ export default function SalesPOS() {
                           >
                             <div>
                               <div className="text-sm font-bold text-slate-800">{prod.name}</div>
-                              <div className="text-[10px] font-bold text-brand-600 bg-brand-100 px-1.5 py-0.5 rounded inline-block mt-0.5">ART: {prod.code}</div>
-                              <div className="text-[10px] text-slate-500 inline-block ml-2">Stock: {prod.stock}</div>
+                              <div className="flex items-center space-x-1.5 mt-0.5">
+                                <span className="text-[10px] font-bold text-brand-600 bg-brand-100 px-1.5 py-0.5 rounded">ART: {prod.code}</span>
+                                {prod.sizes && (
+                                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                                    Talles: {prod.sizes}
+                                  </span>
+                                )}
+                                <span className="text-[10px] text-slate-500">Stock: {prod.stock}</span>
+                              </div>
                             </div>
                             <div className="text-brand-600 font-extrabold text-sm">
                               ${prod.sale_price.toLocaleString('es-AR')}
@@ -565,6 +590,16 @@ export default function SalesPOS() {
                   required
                   value={newCustomer.phone}
                   onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
+                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-brand-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Talle Habitual (Opcional)</label>
+                <input
+                  type="text"
+                  placeholder="Ej: 95 / M"
+                  value={newCustomer.size}
+                  onChange={e => setNewCustomer({...newCustomer, size: e.target.value})}
                   className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-brand-500 outline-none"
                 />
               </div>

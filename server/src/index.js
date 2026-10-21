@@ -16,6 +16,7 @@ import salesRouter from './routes/sales.js';
 import cashRouter from './routes/cash.js';
 import reportsRouter from './routes/reports.js';
 import superadminRouter from './routes/superadmin.js';
+import settingsRouter from './routes/settings.js';
 
 dotenv.config();
 
@@ -75,6 +76,7 @@ app.use('/api/sales', salesRouter);
 app.use('/api/cash', cashRouter);
 app.use('/api/reports', reportsRouter);
 app.use('/api/superadmin', superadminRouter);
+app.use('/api/settings', settingsRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', app: 'Amore Mío API', producer: 'RolΦ Studio' });

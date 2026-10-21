@@ -90,6 +90,8 @@ export async function initDb() {
       stock INTEGER NOT NULL DEFAULT 0,
       min_stock_alert INTEGER NOT NULL DEFAULT 5,
       image_url TEXT,
+      images TEXT,
+      sizes TEXT,
       is_published INTEGER NOT NULL DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
@@ -103,6 +105,7 @@ export async function initDb() {
       phone TEXT NOT NULL,
       email TEXT,
       address TEXT,
+      size TEXT,
       credit_balance REAL NOT NULL DEFAULT 0.0,
       credit_limit REAL NOT NULL DEFAULT 50000.0,
       notes TEXT,
@@ -220,6 +223,42 @@ export async function initDb() {
       sql: 'INSERT INTO system_settings (key, value) VALUES (?, ?)',
       args: ['license_expiration', expireDate.toISOString()]
     });
+  }
+
+  // Seed default catalog WhatsApp if missing
+  const waRes = await client.execute({
+    sql: 'SELECT value FROM system_settings WHERE key = ?',
+    args: ['catalog_whatsapp']
+  });
+  if (waRes.rows.length === 0) {
+    await client.execute({
+      sql: 'INSERT INTO system_settings (key, value) VALUES (?, ?)',
+      args: ['catalog_whatsapp', '5493416123456']
+    });
+  }
+
+  // Migrations for existing databases (add sizes, images to products, and size to customers)
+  try {
+    const prodCols = await client.execute('PRAGMA table_info(products)');
+    const colNames = prodCols.rows.map(r => r.name);
+    if (!colNames.includes('sizes')) {
+      await client.execute('ALTER TABLE products ADD COLUMN sizes TEXT');
+    }
+    if (!colNames.includes('images')) {
+      await client.execute('ALTER TABLE products ADD COLUMN images TEXT');
+    }
+  } catch (err) {
+    console.warn('Migration products columns:', err.message);
+  }
+
+  try {
+    const custCols = await client.execute('PRAGMA table_info(customers)');
+    const colNames = custCols.rows.map(r => r.name);
+    if (!colNames.includes('size')) {
+      await client.execute('ALTER TABLE customers ADD COLUMN size TEXT');
+    }
+  } catch (err) {
+    console.warn('Migration customers columns:', err.message);
   }
 
   // Seed default categories

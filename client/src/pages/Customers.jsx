@@ -32,6 +32,7 @@ export default function Customers() {
     phone: '',
     email: '',
     address: '',
+    size: '',
     credit_limit: '50000',
     notes: ''
   });
@@ -86,7 +87,7 @@ export default function Customers() {
     try {
       await api.post('/customers', newCustomer);
       setShowAddModal(false);
-      setNewCustomer({ name: '', phone: '', email: '', address: '', credit_limit: '50000', notes: '' });
+      setNewCustomer({ name: '', phone: '', email: '', address: '', size: '', credit_limit: '50000', notes: '' });
       loadCustomers();
     } catch (err) {
       alert(err.response?.data?.error || 'Error al registrar cliente.');
@@ -209,6 +210,7 @@ export default function Customers() {
             <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200">
               <tr>
                 <th className="p-4">Cliente</th>
+                <th className="p-4">Talle Habitual</th>
                 <th className="p-4">WhatsApp / Teléfono</th>
                 <th className="p-4">Dirección</th>
                 <th className="p-4">Saldo Deudor</th>
@@ -219,11 +221,11 @@ export default function Customers() {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="p-8 text-center text-slate-400">Cargando nómina de clientes...</td>
+                  <td colSpan="7" className="p-8 text-center text-slate-400">Cargando nómina de clientes...</td>
                 </tr>
               ) : customers.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="p-8 text-center text-slate-400">No se encontraron clientes registrados.</td>
+                  <td colSpan="7" className="p-8 text-center text-slate-400">No se encontraron clientes registrados.</td>
                 </tr>
               ) : (
                 customers.map((cust) => {
@@ -233,6 +235,15 @@ export default function Customers() {
                       <td className="p-4">
                         <span className="font-bold text-slate-900 block text-sm">{cust.name}</span>
                         {cust.email && <span className="text-slate-400 text-[11px] block">{cust.email}</span>}
+                      </td>
+                      <td className="p-4">
+                        {cust.size ? (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
+                            {cust.size}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 text-xs italic">Sin registrar</span>
+                        )}
                       </td>
                       <td className="p-4">
                         <div className="flex items-center space-x-2">
@@ -305,7 +316,7 @@ export default function Customers() {
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 p-4 bg-brand-50/40 rounded-2xl border border-brand-100 mb-4 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-brand-50/40 rounded-2xl border border-brand-100 mb-4 text-xs">
               <div>
                 <span className="text-slate-500 block">Saldo Deudor Actual:</span>
                 <span className="text-lg font-extrabold text-brand-600">${selectedCustomerDetail.credit_balance.toLocaleString('es-AR')}</span>
@@ -313,6 +324,12 @@ export default function Customers() {
               <div>
                 <span className="text-slate-500 block">Límite Autorizado:</span>
                 <span className="text-sm font-bold text-slate-800">${selectedCustomerDetail.credit_limit.toLocaleString('es-AR')}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block">Talle Habitual:</span>
+                <span className="text-sm font-bold text-brand-700 bg-white px-2 py-0.5 rounded-lg border border-brand-200 inline-block mt-0.5">
+                  {selectedCustomerDetail.size || 'Sin registrar'}
+                </span>
               </div>
             </div>
 
@@ -400,6 +417,18 @@ export default function Customers() {
                   placeholder="lucia@gmail.com"
                   className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-500 outline-none"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Talle Habitual del Cliente</label>
+                <input
+                  type="text"
+                  value={newCustomer.size}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, size: e.target.value })}
+                  placeholder="Ej: 95 / M o Corpiño 90, Bombacha 2"
+                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-500 outline-none"
+                />
+                <span className="text-[10px] text-slate-400 block mt-0.5">Permite a los vendedores saber rápidamente qué talle ofrecerle.</span>
               </div>
 
               <div>

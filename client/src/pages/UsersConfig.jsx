@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
-import { Settings, UserPlus, Shield, Percent, DollarSign, Edit3, Key, CheckCircle2 } from 'lucide-react';
+import { Settings, UserPlus, Shield, Percent, DollarSign, Edit3, Key, CheckCircle2, MessageCircle, Phone, Save, ExternalLink } from 'lucide-react';
 
 export default function UsersConfig() {
   const { user: currentUser } = useContext(AuthContext);
@@ -9,6 +9,11 @@ export default function UsersConfig() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+
+  // Settings State
+  const [catalogWhatsapp, setCatalogWhatsapp] = useState('');
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsSuccess, setSettingsSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -21,7 +26,34 @@ export default function UsersConfig() {
 
   useEffect(() => {
     loadUsers();
+    loadSettings();
   }, []);
+
+  const loadSettings = async () => {
+    try {
+      const res = await api.get('/settings');
+      if (res.data && res.data.catalog_whatsapp) {
+        setCatalogWhatsapp(res.data.catalog_whatsapp);
+      }
+    } catch (err) {
+      console.error('Error cargando configuración:', err);
+    }
+  };
+
+  const handleSaveSettings = async (e) => {
+    e.preventDefault();
+    setSavingSettings(true);
+    setSettingsSuccess(false);
+    try {
+      await api.put('/settings', { catalog_whatsapp: catalogWhatsapp });
+      setSettingsSuccess(true);
+      setTimeout(() => setSettingsSuccess(false), 3500);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error al guardar configuración.');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   const loadUsers = async () => {
     setLoading(true);
@@ -100,6 +132,81 @@ export default function UsersConfig() {
           <UserPlus className="w-4 h-4 mr-1.5" />
           Nuevo Vendedor / Encargado
         </button>
+      </div>
+
+      {/* Configuración General: WhatsApp del Catálogo Web */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div className="flex items-start space-x-3.5">
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-600 flex-shrink-0">
+              <MessageCircle className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900 flex items-center">
+                WhatsApp Oficial del Catálogo Web
+                <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                  Público
+                </span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Los clientes que visiten el catálogo online harán clic en "Consultar por WhatsApp" y enviarán sus mensajes a este número.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <form onSubmit={handleSaveSettings} className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+          <div className="flex-1">
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Número de WhatsApp (con código de país y área, sin 0 ni 15)
+            </label>
+            <div className="relative">
+              <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <input
+                type="text"
+                placeholder="Ej: 5493416123456"
+                value={catalogWhatsapp}
+                onChange={(e) => setCatalogWhatsapp(e.target.value)}
+                required
+                className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-mono"
+              />
+            </div>
+            <span className="text-[10px] text-slate-400 block mt-1">
+              Formato internacional para Argentina: <strong>549 + código de área sin 0 + número sin 15</strong> (Ejemplo Rosario: 5493416123456, Buenos Aires: 5491123456789).
+            </span>
+          </div>
+
+          <div className="flex space-x-2">
+            <button
+              type="submit"
+              disabled={savingSettings}
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl text-xs transition shadow-md shadow-emerald-600/20 flex items-center justify-center disabled:opacity-50"
+            >
+              <Save className="w-4 h-4 mr-1.5" />
+              {savingSettings ? 'Guardando...' : 'Guardar WhatsApp'}
+            </button>
+
+            {catalogWhatsapp && (
+              <a
+                href={`https://wa.me/${catalogWhatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Hola, mensaje de prueba desde Amore Mío')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition flex items-center justify-center border border-slate-200"
+                title="Probar abrir WhatsApp con este número"
+              >
+                <ExternalLink className="w-4 h-4 mr-1 text-emerald-600" />
+                Probar
+              </a>
+            )}
+          </div>
+        </form>
+
+        {settingsSuccess && (
+          <div className="mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs flex items-center">
+            <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600 flex-shrink-0" />
+            <span>¡Número de WhatsApp del catálogo guardado exitosamente! Ahora todas las consultas web se dirigirán a este número.</span>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">

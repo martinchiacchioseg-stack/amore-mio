@@ -17,8 +17,8 @@ router.get('/', authenticateToken, async (req, res) => {
     }
 
     if (search) {
-      sql += ' AND (name LIKE ? OR phone LIKE ? OR email LIKE ?)';
-      args.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      sql += ' AND (name LIKE ? OR phone LIKE ? OR email LIKE ? OR size LIKE ?)';
+      args.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     sql += ' ORDER BY name ASC';
@@ -74,27 +74,60 @@ router.get('/alerts/overdue', authenticateToken, async (req, res) => {
 // POST /api/customers (Create customer)
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const { name, phone, email, address, credit_limit, notes } = req.body;
+    const { name, phone, email, address, credit_limit, notes, size } = req.body;
     if (!name || !phone) {
       return res.status(400).json({ error: 'Nombre y WhatsApp son obligatorios.' });
     }
 
     await client.execute({
-      sql: `INSERT INTO customers (name, phone, email, address, credit_limit, notes)
-            VALUES (?, ?, ?, ?, ?, ?)`,
+      sql: `INSERT INTO customers (name, phone, email, address, credit_limit, notes, size)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
       args: [
         name.trim(),
         phone.trim(),
         email ? email.trim() : '',
         address ? address.trim() : '',
         Number(credit_limit) || 50000.0,
-        notes || ''
+        notes || '',
+        size ? size.trim() : ''
       ]
     });
 
     return res.status(201).json({ message: 'Cliente registrado exitosamente.' });
   } catch (err) {
     return res.status(500).json({ error: 'Error al registrar cliente.' });
+  }
+});
+
+// PUT /api/customers/:id (Update customer)
+router.put('/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, phone, email, address, credit_limit, notes, size } = req.body;
+
+    if (!name || !phone) {
+      return res.status(400).json({ error: 'Nombre y WhatsApp son obligatorios.' });
+    }
+
+    await client.execute({
+      sql: `UPDATE customers SET
+              name = ?, phone = ?, email = ?, address = ?, credit_limit = ?, notes = ?, size = ?
+            WHERE id = ?`,
+      args: [
+        name.trim(),
+        phone.trim(),
+        email ? email.trim() : '',
+        address ? address.trim() : '',
+        Number(credit_limit) || 50000.0,
+        notes || '',
+        size ? size.trim() : '',
+        id
+      ]
+    });
+
+    return res.json({ message: 'Cliente actualizado exitosamente.' });
+  } catch (err) {
+    return res.status(500).json({ error: 'Error al actualizar cliente.' });
   }
 });
 

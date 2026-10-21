@@ -20,7 +20,9 @@ import {
   MessageCircle,
   Copy,
   Check,
-  Share2
+  Share2,
+  Image,
+  ImagePlus
 } from 'lucide-react';
 
 export default function Products() {
@@ -47,6 +49,7 @@ export default function Products() {
     code: '',
     name: '',
     description: '',
+    sizes: '',
     category_id: '',
     supplier_id: '',
     cost_price: '',
@@ -54,9 +57,10 @@ export default function Products() {
     profit_percentage: '',
     stock: '',
     min_stock_alert: '5',
-    is_published: true
+    is_published: true,
+    existingImages: []
   });
-  const [imageFile, setImageFile] = useState(null);
+  const [newImageFiles, setNewImageFiles] = useState([]);
   const [error, setError] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -121,13 +125,21 @@ export default function Products() {
 
   const handleOpenModal = (prod = null) => {
     setError('');
-    setImageFile(null);
+    setNewImageFiles([]);
     if (prod) {
       setEditingId(prod.id);
+      let existingImgs = [];
+      if (Array.isArray(prod.images) && prod.images.length > 0) {
+        existingImgs = prod.images;
+      } else if (prod.image_url) {
+        existingImgs = [prod.image_url];
+      }
+
       setFormData({
         code: prod.code,
         name: prod.name,
         description: prod.description || '',
+        sizes: prod.sizes || '',
         category_id: prod.category_id || '',
         supplier_id: prod.supplier_id || '',
         cost_price: prod.cost_price.toString(),
@@ -135,7 +147,8 @@ export default function Products() {
         profit_percentage: prod.profit_percentage.toString(),
         stock: prod.stock.toString(),
         min_stock_alert: prod.min_stock_alert.toString(),
-        is_published: prod.is_published === 1
+        is_published: prod.is_published === 1,
+        existingImages: existingImgs
       });
     } else {
       setEditingId(null);
@@ -143,6 +156,7 @@ export default function Products() {
         code: '',
         name: '',
         description: '',
+        sizes: '',
         category_id: categories.length > 0 ? categories[0].id.toString() : '',
         supplier_id: suppliers.length > 0 ? suppliers[0].id.toString() : '',
         cost_price: '',
@@ -150,10 +164,29 @@ export default function Products() {
         profit_percentage: '100', // Default 100% margin
         stock: '10',
         min_stock_alert: '5',
-        is_published: true
+        is_published: true,
+        existingImages: []
       });
     }
     setShowModal(true);
+  };
+
+  const handleFilesSelect = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files);
+      setNewImageFiles(prev => [...prev, ...filesArray]);
+    }
+  };
+
+  const handleRemoveExistingImage = (idx) => {
+    setFormData(prev => ({
+      ...prev,
+      existingImages: prev.existingImages.filter((_, i) => i !== idx)
+    }));
+  };
+
+  const handleRemoveNewFile = (idx) => {
+    setNewImageFiles(prev => prev.filter((_, i) => i !== idx));
   };
 
   // Price calculations
@@ -201,6 +234,7 @@ export default function Products() {
     data.append('code', formData.code);
     data.append('name', formData.name);
     data.append('description', formData.description);
+    data.append('sizes', formData.sizes || '');
     data.append('category_id', formData.category_id);
     data.append('supplier_id', formData.supplier_id);
     data.append('cost_price', formData.cost_price);
@@ -209,10 +243,11 @@ export default function Products() {
     data.append('stock', formData.stock);
     data.append('min_stock_alert', formData.min_stock_alert);
     data.append('is_published', formData.is_published);
+    data.append('images', JSON.stringify(formData.existingImages || []));
 
-    if (imageFile) {
-      data.append('image', imageFile);
-    }
+    newImageFiles.forEach((file) => {
+      data.append('images', file);
+    });
 
     try {
       if (editingId) {
@@ -369,7 +404,7 @@ export default function Products() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <input
               type="text"
-              placeholder="Buscar por código o nombre..."
+              placeholder="Buscar por código, nombre o talle..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none bg-slate-50"
@@ -410,6 +445,7 @@ export default function Products() {
                 <th className="p-4">Foto / Código</th>
                 <th className="p-4">Producto</th>
                 <th className="p-4">Categoría</th>
+                <th className="p-4">Talles</th>
                 <th className="p-4">Costo / Venta</th>
                 <th className="p-4">Margen %</th>
                 <th className="p-4">Stock Actual</th>
@@ -420,26 +456,34 @@ export default function Products() {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="p-8 text-center text-slate-400">Cargando catálogo de productos...</td>
+                  <td colSpan="9" className="p-8 text-center text-slate-400">Cargando catálogo de productos...</td>
                 </tr>
               ) : products.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="p-8 text-center text-slate-400">No se encontraron productos en el inventario.</td>
+                  <td colSpan="9" className="p-8 text-center text-slate-400">No se encontraron productos en el inventario.</td>
                 </tr>
               ) : (
                 products.map((prod) => {
                   const isLowStock = prod.stock <= prod.min_stock_alert;
+                  const hasMultipleImgs = Array.isArray(prod.images) && prod.images.length > 1;
                   return (
                     <tr key={prod.id} className="hover:bg-slate-50/80 transition">
                       <td className="p-4">
                         <div className="flex items-center space-x-3">
-                          {prod.image_url ? (
-                            <img src={prod.image_url} alt={prod.name} className="w-10 h-10 rounded-lg object-cover border border-slate-200" />
-                          ) : (
-                            <div className="w-10 h-10 rounded-lg bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-500">
-                              <Package className="w-5 h-5" />
-                            </div>
-                          )}
+                          <div className="relative">
+                            {prod.image_url ? (
+                              <img src={prod.image_url} alt={prod.name} className="w-10 h-10 rounded-lg object-cover border border-slate-200" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-500">
+                                <Package className="w-5 h-5" />
+                              </div>
+                            )}
+                            {hasMultipleImgs && (
+                              <span className="absolute -bottom-1 -right-1 bg-brand-600 text-white text-[8px] font-bold px-1 rounded-full shadow">
+                                +{prod.images.length}
+                              </span>
+                            )}
+                          </div>
                           <span className="font-mono font-bold text-slate-700">{prod.code}</span>
                         </div>
                       </td>
@@ -449,6 +493,19 @@ export default function Products() {
                       </td>
                       <td className="p-4 font-semibold text-slate-600">
                         {prod.category_name || 'Sin categoría'}
+                      </td>
+                      <td className="p-4">
+                        {prod.sizes ? (
+                          <div className="flex flex-wrap gap-1 max-w-[120px]">
+                            {prod.sizes.split(',').map((s, idx) => (
+                              <span key={idx} className="px-1.5 py-0.5 bg-brand-50 text-brand-700 border border-brand-200 rounded text-[10px] font-bold">
+                                {s.trim()}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 text-xs italic">-</span>
+                        )}
                       </td>
                       <td className="p-4">
                         <span className="text-slate-400 block text-[11px]">Costo: ${prod.cost_price.toLocaleString('es-AR')}</span>
@@ -683,13 +740,79 @@ export default function Products() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Foto del Producto (Opcional)</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Talles Disponibles</label>
                 <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setImageFile(e.target.files[0])}
-                  className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100"
+                  type="text"
+                  value={formData.sizes}
+                  onChange={(e) => setFormData({ ...formData, sizes: e.target.value })}
+                  placeholder="Ej: 85, 90, 95, 100 o 1, 2, 3, 4 o S, M, L, XL"
+                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-500 outline-none"
                 />
+                <span className="text-[10px] text-slate-400 block mt-0.5">Separa los talles con comas para que los clientes puedan verlos y buscar por talle.</span>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700">Fotos del Producto (Una o Varias)</label>
+                  <span className="text-[10px] text-slate-400">Podés subir varias fotos para la galería web</span>
+                </div>
+
+                {/* Previews of existing and new photos */}
+                {((formData.existingImages && formData.existingImages.length > 0) || newImageFiles.length > 0) && (
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-3">
+                    {formData.existingImages.map((img, idx) => (
+                      <div key={`existing-${idx}`} className="relative h-20 rounded-xl overflow-hidden border border-slate-200 group">
+                        <img src={img} alt={`Foto ${idx+1}`} className="w-full h-full object-cover" />
+                        {idx === 0 && (
+                          <span className="absolute top-1 left-1 bg-brand-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">
+                            Principal
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveExistingImage(idx)}
+                          className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-lg opacity-80 group-hover:opacity-100 transition shadow"
+                          title="Eliminar foto"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                    {newImageFiles.map((file, idx) => (
+                      <div key={`new-${idx}`} className="relative h-20 rounded-xl overflow-hidden border-2 border-emerald-400 group">
+                        <img src={URL.createObjectURL(file)} alt="Nueva foto" className="w-full h-full object-cover" />
+                        <span className="absolute top-1 left-1 bg-emerald-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">
+                          Nueva
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveNewFile(idx)}
+                          className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-lg opacity-80 group-hover:opacity-100 transition shadow"
+                          title="Eliminar foto"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex items-center">
+                  <label className="cursor-pointer flex items-center px-4 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 rounded-xl text-xs font-bold transition">
+                    <ImagePlus className="w-4 h-4 mr-1.5" />
+                    + Agregar Fotos
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleFilesSelect}
+                      className="hidden"
+                    />
+                  </label>
+                  <span className="text-[10px] text-slate-400 ml-3">
+                    {((formData.existingImages?.length || 0) + newImageFiles.length)} foto(s) cargadas
+                  </span>
+                </div>
               </div>
 
               <div className="flex items-center space-x-2 pt-2">

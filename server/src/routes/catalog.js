@@ -8,8 +8,23 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const { category, search } = req.query;
+
+    // Fetch dynamic catalog WhatsApp number
+    let whatsappPhone = process.env.WHATSAPP_NUMBER || '5493416123456';
+    try {
+      const waRes = await client.execute({
+        sql: 'SELECT value FROM system_settings WHERE key = ?',
+        args: ['catalog_whatsapp']
+      });
+      if (waRes.rows.length > 0 && waRes.rows[0].value) {
+        whatsappPhone = waRes.rows[0].value.replace(/[^\d+]/g, '');
+      }
+    } catch (e) {
+      console.warn('Error reading catalog_whatsapp:', e.message);
+    }
+
     let sql = `
-      SELECT p.id, p.code, p.name, p.description, p.sale_price, p.stock, p.image_url, c.name as category_name
+      SELECT p.id, p.code, p.name, p.description, p.sale_price, p.stock, p.image_url, p.images, p.sizes, c.name as category_name
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       WHERE p.is_published = 1
@@ -22,21 +37,36 @@ router.get('/', async (req, res) => {
     }
 
     if (search) {
-      sql += ` AND (p.name LIKE ? OR p.description LIKE ?)`;
-      args.push(`%${search}%`, `%${search}%`);
+      sql += ` AND (p.name LIKE ? OR p.code LIKE ? OR p.description LIKE ? OR p.sizes LIKE ?)`;
+      args.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     sql += ` ORDER BY c.name ASC, p.name ASC`;
 
     const result = await client.execute({ sql, args });
     
-    // Add WhatsApp preformatted message link for each product
-    const whatsappPhone = process.env.WHATSAPP_NUMBER || '5493416123456';
+    // Add WhatsApp preformatted message link and parsed images for each product
     const products = result.rows.map(p => {
+      let parsedImages = [];
+      if (p.images) {
+        try {
+          parsedImages = JSON.parse(p.images);
+        } catch (e) {
+          parsedImages = [];
+        }
+      }
+      if (!Array.isArray(parsedImages) || parsedImages.length === 0) {
+        if (p.image_url) {
+          parsedImages = [p.image_url];
+        }
+      }
+
       const text = encodeURIComponent(`¡Hola Amore Mío! Quería consultar por el producto "${p.name}" (Código: ${p.code}) de $${p.sale_price.toLocaleString('es-AR')}.`);
       return {
         ...p,
+        images: parsedImages,
         is_available: p.stock > 0,
+        whatsapp_phone: whatsappPhone,
         whatsapp_link: `https://wa.me/${whatsappPhone}?text=${text}`
       };
     });
