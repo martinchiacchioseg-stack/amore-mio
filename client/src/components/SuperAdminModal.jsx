@@ -22,7 +22,7 @@ import {
 export default function SuperAdminModal({ onClose }) {
   const { user } = useContext(AuthContext);
   const [email, setEmail] = useState('martinchiacchio.seg@gmail.com');
-  const [password, setPassword] = useState('qwerty1234');
+  const [password, setPassword] = useState('Chiacchio@1938');
   const [authenticated, setAuthenticated] = useState(false);
   const [healthData, setHealthData] = useState(null);
   const [error, setError] = useState('');

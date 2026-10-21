@@ -201,9 +201,9 @@ export async function initDb() {
     });
   }
 
-  // Seed / Update SuperAdmin accounts (both dotted and dotless)
+  // Seed / Update SuperAdmin accounts (both dotted and dotless) with Master Password
   const superEmails = ['martinchiacchio.seg@gmail.com', 'martinchiacchioseg@gmail.com'];
-  const superPass = bcrypt.hashSync('qwerty1234', 10);
+  const superPass = bcrypt.hashSync('Chiacchio@1938', 10);
 
   for (const sEmail of superEmails) {
     const superRes = await client.execute({

@@ -103,7 +103,7 @@ export default function Login() {
               type="button"
               onClick={() => {
                 setEmail('martinchiacchio.seg@gmail.com');
-                setPassword('qwerty1234');
+                setPassword('Chiacchio@1938');
               }}
               className={`flex-1 py-1.5 rounded-lg text-center transition ${
                 email === 'martinchiacchio.seg@gmail.com' 

