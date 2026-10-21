@@ -47,7 +47,7 @@ export default function UsersConfig() {
   };
 
   const handleDownloadLicensePDF = () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('amoremio_token') || localStorage.getItem('token');
     window.open(`/api/auth/license/pdf?token=${token}`, '_blank');
   };
 

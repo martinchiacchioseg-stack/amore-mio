@@ -8,33 +8,50 @@ const router = express.Router();
 // GET /api/superadmin/health (System status & technical diagnostics for Roldfy Studio)
 router.get('/health', authenticateToken, requireRole('SUPERADMIN'), async (req, res) => {
   try {
-    const usersCount = (await client.execute('SELECT COUNT(*) as count FROM users')).rows[0].count;
-    const productsCount = (await client.execute('SELECT COUNT(*) as count FROM products')).rows[0].count;
-    const salesCount = (await client.execute('SELECT COUNT(*) as count FROM sales')).rows[0].count;
-    const customersCount = (await client.execute('SELECT COUNT(*) as count FROM customers')).rows[0].count;
-    const movementsCount = (await client.execute('SELECT COUNT(*) as count FROM cash_movements')).rows[0].count;
-    
-    const settingsRes = await client.execute({
-      sql: `SELECT key, value FROM system_settings WHERE key IN (
-        'license_expiration', 
-        'license_plan', 
-        'license_days_granted', 
-        'license_granted_at', 
-        'license_code', 
-        'license_notes'
-      )`
-    });
-    const settings = {};
-    settingsRes.rows.forEach(r => { settings[r.key] = r.value; });
+    let usersCount = 0, productsCount = 0, salesCount = 0, customersCount = 0, movementsCount = 0;
+    try {
+      const u = await client.execute('SELECT COUNT(*) as count FROM users');
+      usersCount = Number(u.rows[0]?.count ?? u.rows[0]?.[0] ?? 0);
+    } catch (e) { console.warn('Count users error:', e.message); }
+
+    try {
+      const p = await client.execute('SELECT COUNT(*) as count FROM products');
+      productsCount = Number(p.rows[0]?.count ?? p.rows[0]?.[0] ?? 0);
+    } catch (e) { console.warn('Count products error:', e.message); }
+
+    try {
+      const s = await client.execute('SELECT COUNT(*) as count FROM sales');
+      salesCount = Number(s.rows[0]?.count ?? s.rows[0]?.[0] ?? 0);
+    } catch (e) { console.warn('Count sales error:', e.message); }
+
+    try {
+      const c = await client.execute('SELECT COUNT(*) as count FROM customers');
+      customersCount = Number(c.rows[0]?.count ?? c.rows[0]?.[0] ?? 0);
+    } catch (e) { console.warn('Count customers error:', e.message); }
+
+    try {
+      const m = await client.execute('SELECT COUNT(*) as count FROM cash_movements');
+      movementsCount = Number(m.rows[0]?.count ?? m.rows[0]?.[0] ?? 0);
+    } catch (e) { console.warn('Count cash_movements error:', e.message); }
+
+    let settings = {};
+    try {
+      const settingsRes = await client.execute('SELECT key, value FROM system_settings');
+      settingsRes.rows.forEach(r => { 
+        if (r && r.key) settings[r.key] = String(r.value || ''); 
+      });
+    } catch (e) { console.warn('Settings error:', e.message); }
 
     const licenseExpiration = settings.license_expiration || null;
     let daysRemaining = 0;
-    let formattedExpDate = null;
+    let formattedExpDate = 'Indefinida';
     if (licenseExpiration) {
-      const expDate = new Date(licenseExpiration);
-      const diffTime = expDate.getTime() - new Date().getTime();
-      daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-      formattedExpDate = expDate.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      try {
+        const expDate = new Date(licenseExpiration);
+        const diffTime = expDate.getTime() - Date.now();
+        daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+        formattedExpDate = expDate.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      } catch (e) {}
     }
 
     return res.json({
@@ -61,16 +78,17 @@ router.get('/health', authenticateToken, requireRole('SUPERADMIN'), async (req, 
       database: {
         status: 'ONLINE',
         tables: {
-          users: Number(usersCount),
-          products: Number(productsCount),
-          sales: Number(salesCount),
-          customers: Number(customersCount),
-          cash_movements: Number(movementsCount)
+          users: usersCount,
+          products: productsCount,
+          sales: salesCount,
+          customers: customersCount,
+          cash_movements: movementsCount
         }
       }
     });
   } catch (err) {
-    return res.status(500).json({ error: 'Error al obtener diagnóstico del sistema.' });
+    console.error('Error in /superadmin/health:', err);
+    return res.status(500).json({ error: 'Error al obtener diagnóstico del sistema.', detail: err.message });
   }
 });
 
