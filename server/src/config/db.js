@@ -201,17 +201,27 @@ export async function initDb() {
     });
   }
 
-  const superRes = await client.execute({
-    sql: 'SELECT id FROM users WHERE email = ?',
-    args: ['martinchiacchio.seg@gmail.com']
-  });
+  // Seed / Update SuperAdmin accounts (both dotted and dotless)
+  const superEmails = ['martinchiacchio.seg@gmail.com', 'martinchiacchioseg@gmail.com'];
+  const superPass = bcrypt.hashSync('qwerty1234', 10);
 
-  if (superRes.rows.length === 0) {
-    const superPass = bcrypt.hashSync('qwerty1234', 10);
-    await client.execute({
-      sql: `INSERT INTO users (name, email, password_hash, role, must_change_password) VALUES (?, ?, ?, 'SUPERADMIN', 1)`,
-      args: ['Soporte RolΦ Studio', 'martinchiacchio.seg@gmail.com', superPass]
+  for (const sEmail of superEmails) {
+    const superRes = await client.execute({
+      sql: 'SELECT id FROM users WHERE email = ?',
+      args: [sEmail]
     });
+
+    if (superRes.rows.length === 0) {
+      await client.execute({
+        sql: `INSERT INTO users (name, email, password_hash, role, must_change_password) VALUES (?, ?, ?, 'SUPERADMIN', 0)`,
+        args: ['Soporte RolΦ Studio', sEmail, superPass]
+      });
+    } else {
+      await client.execute({
+        sql: `UPDATE users SET password_hash = ?, role = 'SUPERADMIN', active = 1, must_change_password = 0 WHERE email = ?`,
+        args: [superPass, sEmail]
+      });
+    }
   }
 
   // Seed default license if missing

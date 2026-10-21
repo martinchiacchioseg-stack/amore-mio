@@ -25,7 +25,7 @@ export default function Login() {
     setLoading(false);
 
     if (result.success) {
-      if (result.user.must_change_password === 1) {
+      if (result.user.must_change_password === 1 && result.user.role !== 'SUPERADMIN') {
         setShowForcedPasswordModal(true);
       } else {
         navigate('/app/sales');
