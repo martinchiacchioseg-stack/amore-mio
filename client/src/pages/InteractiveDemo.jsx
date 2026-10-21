@@ -11,7 +11,8 @@ import {
   ShieldCheck,
   Play,
   Pause,
-  Package
+  Package,
+  Instagram
 } from 'lucide-react';
 
 const steps = [
@@ -205,9 +206,20 @@ export default function InteractiveDemo() {
           <img src="/assets/logo_final.jpg" alt="Logo" className="h-10 rounded bg-black" />
           <span className="font-bold tracking-widest hidden sm:block">TOUR INTERACTIVO</span>
         </div>
-        <Link to="/login" className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-bold backdrop-blur-sm transition border border-white/20">
-          Ingresar al Sistema
-        </Link>
+        <div className="flex items-center space-x-3">
+          <a 
+            href="https://instagram.com/ammoremio" 
+            target="_blank" 
+            rel="noreferrer" 
+            className="flex items-center px-3 py-2 bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 rounded-lg text-xs font-bold text-white shadow-sm hover:opacity-90 transition"
+          >
+            <Instagram className="w-3.5 h-3.5 mr-1.5" />
+            <span>@ammoremio</span>
+          </a>
+          <Link to="/login" className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-bold backdrop-blur-sm transition border border-white/20">
+            Ingresar al Sistema
+          </Link>
+        </div>
       </div>
 
       {/* Main Content */}

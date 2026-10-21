@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Truck, Plus, Search, Edit3, Trash2, Phone, Mail, MapPin } from 'lucide-react';
+import { Truck, Plus, Search, Edit3, Trash2, Phone, Mail, MapPin, Instagram, Globe } from 'lucide-react';
 
 export default function Suppliers() {
   const [suppliers, setSuppliers] = useState([]);
@@ -13,7 +13,8 @@ export default function Suppliers() {
     contact_person: '',
     phone: '',
     email: '',
-    address: ''
+    address: '',
+    social_media: ''
   });
 
   useEffect(() => {
@@ -40,11 +41,12 @@ export default function Suppliers() {
         contact_person: sup.contact_person || '',
         phone: sup.phone || '',
         email: sup.email || '',
-        address: sup.address || ''
+        address: sup.address || '',
+        social_media: sup.social_media || ''
       });
     } else {
       setEditingId(null);
-      setFormData({ name: '', contact_person: '', phone: '', email: '', address: '' });
+      setFormData({ name: '', contact_person: '', phone: '', email: '', address: '', social_media: '' });
     }
     setShowModal(true);
   };
@@ -140,6 +142,20 @@ export default function Suppliers() {
                       <span>{sup.address}</span>
                     </div>
                   )}
+                  {sup.social_media && (
+                    <div className="flex items-center">
+                      <Instagram className="w-3.5 h-3.5 mr-2 text-pink-500 flex-shrink-0" />
+                      <a
+                        href={sup.social_media.startsWith('http') ? sup.social_media : `https://instagram.com/${sup.social_media.replace('@', '').trim()}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-brand-600 hover:text-brand-700 font-semibold hover:underline truncate"
+                        title="Ver red social / catálogo del proveedor"
+                      >
+                        {sup.social_media}
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -197,6 +213,20 @@ export default function Suppliers() {
                   placeholder="contacto@proveedor.com"
                   className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Redes Sociales / Instagram / Web</label>
+                <div className="relative">
+                  <Instagram className="w-4 h-4 text-pink-500 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    value={formData.social_media}
+                    onChange={(e) => setFormData({ ...formData, social_media: e.target.value })}
+                    placeholder="Ej: @textilromance o https://..."
+                    className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-xs outline-none focus:ring-2 focus:ring-brand-500"
+                  />
+                </div>
               </div>
 
               <div>

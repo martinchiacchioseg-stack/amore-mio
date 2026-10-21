@@ -18,7 +18,8 @@ import {
   HelpCircle,
   ShieldAlert,
   MessageCircle,
-  ExternalLink
+  ExternalLink,
+  Instagram
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -126,6 +127,17 @@ export default function Navbar() {
               <Store className="w-3.5 h-3.5 sm:mr-1 text-brand-400" />
               <span className="hidden sm:inline">Catálogo</span>
             </Link>
+
+            <a 
+              href="https://instagram.com/ammoremio" 
+              target="_blank" 
+              rel="noreferrer"
+              className="inline-flex items-center px-2 sm:px-2.5 py-1.5 text-xs font-bold text-pink-300 bg-pink-950/40 hover:bg-pink-900/60 border border-pink-700/50 rounded-lg transition"
+              title="Instagram Oficial @ammoremio"
+            >
+              <Instagram className="w-3.5 h-3.5 sm:mr-1 text-pink-400" />
+              <span className="hidden sm:inline">@ammoremio</span>
+            </a>
             
             <a 
               href="/assets/Manual_Amore_Mio.pdf" 
@@ -223,6 +235,20 @@ export default function Navbar() {
                   Ver Catálogo Web
                 </span>
                 <ExternalLink className="w-4 h-4 text-slate-400" />
+              </a>
+
+              <a
+                href="https://instagram.com/ammoremio"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between px-3 py-2.5 text-sm font-bold rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 text-white shadow-sm"
+              >
+                <span className="flex items-center">
+                  <Instagram className="w-4 h-4 mr-2.5 text-white" />
+                  Instagram (@ammoremio)
+                </span>
+                <ExternalLink className="w-4 h-4 text-white/80" />
               </a>
 
               <button

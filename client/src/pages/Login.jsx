@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import PasswordChangeModal from '../components/PasswordChangeModal';
 import SuperAdminModal from '../components/SuperAdminModal';
-import { Lock, Mail, AlertCircle, ArrowRight, Sparkles } from 'lucide-react';
+import { Lock, Mail, AlertCircle, ArrowRight, Sparkles, Instagram } from 'lucide-react';
 
 export default function Login() {
   const { login, user } = useContext(AuthContext);
@@ -62,6 +62,18 @@ export default function Login() {
             <p className="text-xs uppercase font-semibold text-brand-600 tracking-widest mt-2">
               Sistema de Gestión Integral
             </p>
+            <div className="mt-2.5">
+              <a
+                href="https://instagram.com/ammoremio"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center text-xs font-semibold text-pink-600 hover:text-pink-700 bg-pink-50 hover:bg-pink-100 border border-pink-200 px-3 py-1 rounded-full transition shadow-sm hover:scale-105"
+                title="Seguinos en Instagram"
+              >
+                <Instagram className="w-3.5 h-3.5 mr-1.5 text-pink-500" />
+                @ammoremio
+              </a>
+            </div>
           </div>
 
           {error && (

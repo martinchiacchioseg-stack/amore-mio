@@ -17,14 +17,14 @@ router.get('/', authenticateToken, async (req, res) => {
 // POST /api/suppliers
 router.post('/', authenticateToken, requireRole('ADMIN', 'MANAGER', 'SUPERADMIN'), async (req, res) => {
   try {
-    const { name, contact_person, phone, email, address } = req.body;
+    const { name, contact_person, phone, email, address, social_media } = req.body;
     if (!name) {
       return res.status(400).json({ error: 'El nombre del proveedor es obligatorio.' });
     }
 
     await client.execute({
-      sql: 'INSERT INTO suppliers (name, contact_person, phone, email, address) VALUES (?, ?, ?, ?, ?)',
-      args: [name, contact_person || '', phone || '', email || '', address || '']
+      sql: 'INSERT INTO suppliers (name, contact_person, phone, email, address, social_media) VALUES (?, ?, ?, ?, ?, ?)',
+      args: [name, contact_person || '', phone || '', email || '', address || '', social_media || '']
     });
 
     return res.status(201).json({ message: 'Proveedor creado exitosamente.' });
@@ -37,11 +37,11 @@ router.post('/', authenticateToken, requireRole('ADMIN', 'MANAGER', 'SUPERADMIN'
 router.put('/:id', authenticateToken, requireRole('ADMIN', 'MANAGER', 'SUPERADMIN'), async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, contact_person, phone, email, address } = req.body;
+    const { name, contact_person, phone, email, address, social_media } = req.body;
 
     await client.execute({
-      sql: 'UPDATE suppliers SET name = ?, contact_person = ?, phone = ?, email = ?, address = ? WHERE id = ?',
-      args: [name, contact_person || '', phone || '', email || '', address || '', id]
+      sql: 'UPDATE suppliers SET name = ?, contact_person = ?, phone = ?, email = ?, address = ?, social_media = ? WHERE id = ?',
+      args: [name, contact_person || '', phone || '', email || '', address || '', social_media || '', id]
     });
 
     return res.json({ message: 'Proveedor actualizado.' });

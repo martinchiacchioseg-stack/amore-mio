@@ -62,6 +62,7 @@ export async function initDb() {
       phone TEXT,
       email TEXT,
       address TEXT,
+      social_media TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -259,6 +260,16 @@ export async function initDb() {
     }
   } catch (err) {
     console.warn('Migration customers columns:', err.message);
+  }
+
+  try {
+    const suppCols = await client.execute('PRAGMA table_info(suppliers)');
+    const colNames = suppCols.rows.map(r => r.name);
+    if (!colNames.includes('social_media')) {
+      await client.execute('ALTER TABLE suppliers ADD COLUMN social_media TEXT');
+    }
+  } catch (err) {
+    console.warn('Migration suppliers columns:', err.message);
   }
 
   // Seed default categories

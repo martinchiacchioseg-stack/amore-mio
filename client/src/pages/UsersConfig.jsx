@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
-import { Settings, UserPlus, Shield, Percent, DollarSign, Edit3, Key, CheckCircle2, MessageCircle, Phone, Save, ExternalLink } from 'lucide-react';
+import { Settings, UserPlus, Shield, Percent, DollarSign, Edit3, Key, CheckCircle2, MessageCircle, Phone, Save, ExternalLink, Instagram } from 'lucide-react';
 
 export default function UsersConfig() {
   const { user: currentUser } = useContext(AuthContext);
@@ -207,6 +207,33 @@ export default function UsersConfig() {
             <span>¡Número de WhatsApp del catálogo guardado exitosamente! Ahora todas las consultas web se dirigirán a este número.</span>
           </div>
         )}
+
+        {/* Instagram Oficial Amore Mío */}
+        <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-pink-50/60 to-purple-50/60 p-4 rounded-xl border border-pink-100">
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white rounded-xl shadow-sm">
+              <Instagram className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-slate-800 flex items-center">
+                Instagram Oficial Conectado
+                <span className="ml-2 text-[10px] text-pink-600 font-bold bg-pink-100 px-2 py-0.5 rounded-full">Activo</span>
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                El perfil <strong>@ammoremio</strong> se muestra automáticamente con logo oficial en el Catálogo Web, Barra de Navegación y Login.
+              </p>
+            </div>
+          </div>
+          <a
+            href="https://instagram.com/ammoremio"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 text-white font-bold rounded-xl text-xs hover:opacity-90 transition shadow-sm"
+          >
+            <Instagram className="w-4 h-4 mr-1.5" />
+            Visitar @ammoremio
+          </a>
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">

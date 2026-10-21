@@ -47,13 +47,26 @@ Aquí gestionás toda tu mercadería.
 
 Es tu vidriera virtual para que los clientes vean tus colecciones.
 
-- **Compartir fácilmente:** Tocando el botón **"Compartir Enlace"** arriba a la derecha, se copia el link exacto para que lo pegues en Instagram o se lo mandes a tus clientes.
-- **PDF del Catálogo:** Los clientes (o vos) pueden descargar un PDF completo y estético con todos los productos publicados.
-- **WhatsApp Directo:** Tiene un botón para que el cliente te envíe un mensaje a tu WhatsApp con un solo clic.
+- **Instagram Oficial (@ammoremio):** Integrado con botón directo y logo oficial en la cabecera, pie de página y detalles de cada prenda.
+- **Galería de Fotos y Talles:** Los clientes pueden hacer clic en cualquier prenda para ver múltiples fotos en alta resolución, descripción completa y elegir su talle (ej. 85, 90, 95, 1, 2, 3, S, M, L, XL).
+- **Compartir fácilmente:** Tocando el botón **"Compartir"** arriba a la derecha, se copia el link exacto para enviarlo por WhatsApp o compartirlo en historias.
+- **Búsqueda por Talle y Prenda:** Buscador instantáneo que filtra por nombre de artículo, código o talle.
+- **PDF del Catálogo:** Los clientes pueden descargar un PDF completo y estético con todos los productos publicados.
+- **WhatsApp Directo Configurable:** El administrador configura el número de WhatsApp oficial desde Configuración, y las consultas de los clientes llegan con el nombre y talle seleccionado.
 
 ---
 
-## 👥 Usuarios y Comisiones
+## 🚚 Proveedores de Mercadería
+**Acceso:** Administradores y Managers
+
+Módulo para administrar todos los fabricantes y talleres de confección.
+
+- **Datos de Contacto:** Registro de Razón Social, Persona de Contacto, Teléfono/WhatsApp, Email y Dirección.
+- **Redes Sociales & Instagram:** Campo dedicado para registrar el usuario de Instagram (ej: `@textilromance`) o enlace web del proveedor, con acceso directo en un clic para ver sus colecciones y novedades mayoristas.
+
+---
+
+## 👥 Usuarios, WhatsApp y Comisiones
 **Acceso:** Administradores
 
 Desde este menú podés dar de alta a tus vendedoras y configurar cómo cobran.

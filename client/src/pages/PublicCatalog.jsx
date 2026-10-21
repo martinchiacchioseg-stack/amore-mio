@@ -17,7 +17,8 @@ import {
   Camera,
   Layers,
   Info,
-  Eye
+  Eye,
+  Instagram
 } from 'lucide-react';
 
 const FALLBACK_PRODUCTS = [
@@ -208,34 +209,54 @@ export default function PublicCatalog() {
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
             </div>
-            <div className="hidden sm:block">
+            <div>
               <p className="text-[10px] font-bold text-brand-200 tracking-wider uppercase">
                 Catálogo Público Online
               </p>
+              <a 
+                href="https://instagram.com/ammoremio" 
+                target="_blank" 
+                rel="noreferrer"
+                className="inline-flex items-center text-xs text-pink-300 hover:text-white transition font-semibold mt-0.5"
+                title="Instagram Oficial @ammoremio"
+              >
+                <Instagram className="w-3.5 h-3.5 mr-1" />
+                <span>@ammoremio</span>
+              </a>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3 flex-wrap justify-center sm:justify-end gap-y-2">
+            <a
+              href="https://instagram.com/ammoremio"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:opacity-90 text-white transition shadow-sm hover:scale-105"
+              title="Seguinos en Instagram @ammoremio"
+            >
+              <Instagram className="w-4 h-4 mr-1.5" />
+              <span>@ammoremio</span>
+            </a>
             <button
               onClick={handleCopyLink}
-              className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition shadow-sm border border-white/20"
+              className="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition shadow-sm border border-white/20"
               title="Copiar enlace del catálogo"
             >
-              <Share2 className="w-4 h-4 md:mr-1.5" />
-              <span className="hidden md:inline">Compartir Enlace</span>
+              <Share2 className="w-4 h-4 sm:mr-1.5" />
+              <span className="hidden sm:inline">Compartir</span>
             </button>
             <button
               onClick={handleDownloadPDF}
-              className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white transition shadow-sm"
+              className="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white transition shadow-sm"
             >
               <FileText className="w-4 h-4 mr-1.5" />
-              Catálogo PDF
+              PDF
             </button>
             <a
               href={`https://wa.me/${catalogWhatsapp}?text=${encodeURIComponent('¡Hola Amore Mío! Quería hacer una consulta general sobre el catálogo.')}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-sm"
+              className="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-sm"
             >
               <MessageCircle className="w-4 h-4 mr-1.5" />
               WhatsApp
@@ -587,8 +608,8 @@ export default function PublicCatalog() {
                   </div>
                 </div>
 
-                {/* Bottom WhatsApp Button */}
-                <div className="pt-4 border-t border-slate-100">
+                {/* Bottom WhatsApp Button & Instagram */}
+                <div className="pt-4 border-t border-slate-100 space-y-2">
                   <a
                     href={`https://wa.me/${catalogWhatsapp}?text=${encodeURIComponent(
                       `¡Hola Amore Mío! Quería consultar por el producto "${selectedProduct.name}" (Código: ${selectedProduct.code})${selectedSize ? ` en talle ${selectedSize}` : ''} de $${Number(selectedProduct.sale_price).toLocaleString('es-AR')}. ¿Tienen disponibilidad?`
@@ -602,7 +623,18 @@ export default function PublicCatalog() {
                       Consultar por WhatsApp {selectedSize ? `(Talle ${selectedSize})` : ''}
                     </span>
                   </a>
-                  <p className="text-[10px] text-slate-400 text-center mt-2">
+
+                  <a
+                    href="https://instagram.com/ammoremio"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:opacity-95 text-white rounded-2xl text-xs font-bold transition shadow-md space-x-2"
+                  >
+                    <Instagram className="w-4 h-4" />
+                    <span>Ver más en Instagram @ammoremio</span>
+                  </a>
+
+                  <p className="text-[10px] text-slate-400 text-center pt-1">
                     Te responderá directamente el equipo de ventas de Amore Mío.
                   </p>
                 </div>
@@ -612,6 +644,40 @@ export default function PublicCatalog() {
           </div>
         </div>
       )}
+
+      {/* Footer with Amore Mío Instagram & Info */}
+      <footer className="mt-16 bg-white border-t border-slate-200 py-8 px-4">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+          <div className="flex items-center space-x-3">
+            <img 
+              src="/assets/logo_final.jpg" 
+              alt="Amore Mío" 
+              className="h-12 w-auto object-contain rounded" 
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+            <div>
+              <p className="text-sm font-bold text-slate-900">Amore Mío Lencería</p>
+              <p className="text-xs text-slate-500">Diseño, elegancia y calce perfecto para cada momento</p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3">
+            <a
+              href="https://instagram.com/ammoremio"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center px-5 py-2.5 rounded-2xl text-xs font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:opacity-95 text-white transition shadow-md hover:scale-105"
+            >
+              <Instagram className="w-4 h-4 mr-2" />
+              <span>Seguinos en Instagram @ammoremio</span>
+            </a>
+          </div>
+
+          <p className="text-xs text-slate-400">
+            © {new Date().getFullYear()} Amore Mío. Catálogo de Artículos y Lencería.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
