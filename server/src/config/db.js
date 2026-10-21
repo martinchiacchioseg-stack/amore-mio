@@ -63,6 +63,8 @@ export async function initDb() {
       email TEXT,
       address TEXT,
       social_media TEXT,
+      instagram TEXT,
+      facebook TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -267,6 +269,12 @@ export async function initDb() {
     const colNames = suppCols.rows.map(r => r.name);
     if (!colNames.includes('social_media')) {
       await client.execute('ALTER TABLE suppliers ADD COLUMN social_media TEXT');
+    }
+    if (!colNames.includes('instagram')) {
+      await client.execute('ALTER TABLE suppliers ADD COLUMN instagram TEXT');
+    }
+    if (!colNames.includes('facebook')) {
+      await client.execute('ALTER TABLE suppliers ADD COLUMN facebook TEXT');
     }
   } catch (err) {
     console.warn('Migration suppliers columns:', err.message);

@@ -62,7 +62,7 @@ Es tu vidriera virtual para que los clientes vean tus colecciones.
 Módulo para administrar todos los fabricantes y talleres de confección.
 
 - **Datos de Contacto:** Registro de Razón Social, Persona de Contacto, Teléfono/WhatsApp, Email y Dirección.
-- **Redes Sociales & Instagram:** Campo dedicado para registrar el usuario de Instagram (ej: `@textilromance`) o enlace web del proveedor, con acceso directo en un clic para ver sus colecciones y novedades mayoristas.
+- **Redes Sociales (Instagram & Facebook):** Sección con campos dedicados para completar el usuario o página de **Instagram** (ej: `@textilromance`) y **Facebook** del fabricante, con enlaces directos para consultar sus novedades y catálogos mayoristas en un solo clic.
 
 ---
 
