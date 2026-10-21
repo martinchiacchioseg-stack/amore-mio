@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
+import SuperAdminModal from './SuperAdminModal';
 import { 
   ShoppingBag, 
   ShoppingCart, 
@@ -28,6 +29,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [licenseData, setLicenseData] = useState(null);
+  const [showSuperAdminModal, setShowSuperAdminModal] = useState(false);
 
   useEffect(() => {
     if (user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN')) {
@@ -104,11 +106,11 @@ export default function Navbar() {
           )}
 
           {/* User badge & Actions */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {licenseData !== null && licenseData.expirationDate && (
               <Link
                 to="/app/users"
-                className="hidden lg:flex items-center text-[10px] bg-slate-900 border border-slate-700 hover:border-emerald-500/70 text-slate-300 px-2.5 py-1.5 rounded-xl transition cursor-pointer group shadow-sm" 
+                className="hidden sm:flex items-center text-[10px] bg-slate-900 border border-slate-700 hover:border-emerald-500/70 text-slate-300 px-2.5 py-1.5 rounded-xl transition cursor-pointer group shadow-sm" 
                 title={`El sistema tiene una validez de ${licenseData.daysRemaining} días restantes. Clic para ver tarjeta oficial de suscripción.`}
               >
                 <ShieldAlert className={`w-3.5 h-3.5 mr-1.5 ${licenseData.daysRemaining < 30 ? 'text-rose-500' : 'text-emerald-500'}`} />
@@ -118,6 +120,16 @@ export default function Navbar() {
                 </span>
               </Link>
             )}
+
+            <button
+              type="button"
+              onClick={() => setShowSuperAdminModal(true)}
+              className="inline-flex items-center px-2 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white rounded-lg text-xs font-bold transition border border-slate-700/80 hover:border-brand-500 shadow-sm"
+              title="Supervisión Técnica RolΦ Studio"
+            >
+              <img src="/assets/rolphi.jpg" alt="RolΦ Studio" className="h-4 w-auto object-contain rounded mr-1" />
+              <span className="hidden xl:inline text-[11px]">SuperAdmin</span>
+            </button>
 
             <Link 
               to="/catalogo" 
@@ -194,6 +206,24 @@ export default function Navbar() {
             <div className="mb-4 pb-3 border-b border-slate-100">
               <span className="text-sm font-bold text-slate-800 block">{user.name}</span>
               <span className="text-[10px] text-brand-600 uppercase font-semibold block">{user.role}</span>
+
+              {/* Indicador de Licencia en Menú Móvil */}
+              {licenseData !== null && licenseData.expirationDate && (user.role === 'ADMIN' || user.role === 'SUPERADMIN') && (
+                <Link
+                  to="/app/users"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="mt-2.5 flex items-center justify-between p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs shadow-sm"
+                >
+                  <div className="flex items-center">
+                    <ShieldAlert className="w-4 h-4 mr-2 text-emerald-400 flex-shrink-0" />
+                    <div>
+                      <span className="font-bold text-white block text-[11px]">Licencia: {licenseData.expirationDate}</span>
+                      <span className="text-[9.5px] text-emerald-400 font-semibold">Restan {licenseData.daysRemaining} días de validez</span>
+                    </div>
+                  </div>
+                  <span className="text-[9px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">Ver</span>
+                </Link>
+              )}
             </div>
             
             {navItems
@@ -273,9 +303,30 @@ export default function Navbar() {
                 <HelpCircle className="w-4 h-4 mr-2 text-brand-600" />
                 Manual de Usuario PDF
               </a>
+
+              {/* Acceso a Supervisión Técnica RolΦ SuperAdmin en Móviles */}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSuperAdminModal(true);
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-between px-3 py-2.5 text-xs font-bold rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition border border-slate-700 shadow-sm mt-1"
+              >
+                <span className="flex items-center">
+                  <img src="/assets/rolphi.jpg" alt="RolΦ Studio" className="h-4 w-auto mr-2 rounded" />
+                  Supervisión Técnica RolΦ
+                </span>
+                <span className="text-[9px] font-mono bg-brand-900/60 text-brand-300 px-2 py-0.5 rounded border border-brand-700">SUPERADMIN</span>
+              </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* SuperAdmin Modal */}
+      {showSuperAdminModal && (
+        <SuperAdminModal onClose={() => setShowSuperAdminModal(false)} />
       )}
     </header>
   );

@@ -83,6 +83,38 @@ export default function Login() {
             </div>
           )}
 
+          {/* Selector Rápido de Cuenta */}
+          <div className="flex bg-slate-100 p-1 rounded-xl mb-5 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('vampyfz1214@gmail.com');
+                setPassword('qwerty1234');
+              }}
+              className={`flex-1 py-1.5 rounded-lg text-center transition ${
+                email === 'vampyfz1214@gmail.com' 
+                  ? 'bg-white text-brand-700 font-bold shadow-sm' 
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Administrador
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('martinchiacchio.seg@gmail.com');
+                setPassword('qwerty1234');
+              }}
+              className={`flex-1 py-1.5 rounded-lg text-center transition ${
+                email === 'martinchiacchio.seg@gmail.com' 
+                  ? 'bg-slate-900 text-white font-bold shadow-sm' 
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              SuperAdministrador
+            </button>
+          </div>
+
           {/* Form */}
           <form onSubmit={handleLoginSubmit} className="space-y-5">
             <div>
@@ -129,22 +161,23 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Footer note */}
+          {/* Footer note & SuperAdmin Direct Access */}
           <div className="mt-8 pt-6 border-t border-slate-100 text-center flex flex-col items-center">
-            <span className="text-[11px] text-slate-400 block mb-3 font-semibold tracking-wider">
-              DESARROLLADO POR
+            <span className="text-[11px] text-slate-400 block mb-2 font-semibold tracking-wider">
+              SUPERVISIÓN TÉCNICA INDEPENDIENTE
             </span>
             <button
               type="button"
               onClick={() => setShowSuperAdminModal(true)}
-              className="focus:outline-none transition-transform hover:scale-105 active:scale-95"
-              title="Acceso SuperAdministrador"
+              className="inline-flex items-center space-x-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow border border-slate-700 hover:scale-105 active:scale-95"
+              title="Abrir Portal SuperAdministrador RolΦ Studio"
             >
               <img 
                 src="/assets/rolphi.jpg" 
                 alt="RolΦ Studio" 
-                className="h-10 w-auto object-contain rounded opacity-90 hover:opacity-100 transition-opacity cursor-pointer" 
+                className="h-6 w-auto object-contain rounded" 
               />
+              <span>Acceso SuperAdministrador RolΦ</span>
             </button>
           </div>
 

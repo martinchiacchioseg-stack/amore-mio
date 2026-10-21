@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import api from '../services/api';
+import { AuthContext } from '../context/AuthContext';
 import { 
   Shield, 
   Server, 
@@ -19,6 +20,7 @@ import {
 } from 'lucide-react';
 
 export default function SuperAdminModal({ onClose }) {
+  const { user } = useContext(AuthContext);
   const [email, setEmail] = useState('martinchiacchio.seg@gmail.com');
   const [password, setPassword] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
@@ -38,6 +40,25 @@ export default function SuperAdminModal({ onClose }) {
   const [grantOverride, setGrantOverride] = useState(true);
   const [grantNotes, setGrantNotes] = useState('');
   const [grantLoading, setGrantLoading] = useState(false);
+
+  useEffect(() => {
+    // Si el usuario ya está autenticado en la sesión con rol SUPERADMIN, ingresa directo
+    const activeToken = localStorage.getItem('token');
+    if (activeToken && user && user.role === 'SUPERADMIN') {
+      setTempToken(activeToken);
+      setLoading(true);
+      api.get('/superadmin/health', {
+        headers: { Authorization: `Bearer ${activeToken}` }
+      }).then(res => {
+        setHealthData(res.data);
+        setAuthenticated(true);
+      }).catch(err => {
+        console.warn('Auto-login superadmin:', err);
+      }).finally(() => {
+        setLoading(false);
+      });
+    }
+  }, [user]);
 
   const handleSuperLogin = async (e) => {
     e.preventDefault();
